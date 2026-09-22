@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Building2, Shield, Key, Network, FolderKanban, Workflow } from "lucide-react";
+import { Building2, Shield, Key, Network, FolderKanban, Workflow, ShieldCheck } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function ConfigurationPage() {
@@ -9,6 +9,12 @@ export default function ConfigurationPage() {
       description: "Razón social, RNC, información de contacto y configuración general.",
       href: "/configuracion/empresa",
       icon: Building2,
+    },
+    {
+      title: "Facturación Electrónica e-CF",
+      description: "Certificado digital X.509, secuencias DGII autorizadas y switch CERT/PROD.",
+      href: "/configuracion/ecf",
+      icon: ShieldCheck,
     },
     {
       title: "Gestión de Roles",

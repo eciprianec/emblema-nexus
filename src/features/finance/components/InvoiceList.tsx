@@ -13,6 +13,7 @@ import {
   MoreVertical,
   Plus,
   FileText,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { useEcfStore } from "@/features/ecf/store/useEcfStore";
 
 interface InvoiceListProps {
   clientId?: string;
@@ -71,6 +73,34 @@ export function InvoiceList({
       );
     });
   }, [invoices, clientId, caseId, statusFilter, ncfFilter, search]);
+
+  const { openEmitModal } = useEcfStore();
+
+  const handleEmitAsEcf = (inv: Invoice) => {
+    const ecfTypeMap: Record<string, "E31" | "E32" | "E34" | "E44" | "E45"> = {
+      B01: "E31",
+      B02: "E32",
+      B14: "E44",
+      B15: "E45",
+    };
+    const targetType = ecfTypeMap[inv.ncfType] || "E31";
+
+    openEmitModal({
+      ecfType: targetType,
+      rncComprador: inv.clientRncCedula || "",
+      razonSocialComprador: inv.clientName,
+      currency: inv.currency,
+      exchangeRate: inv.exchangeRate,
+      invoiceId: inv.id,
+      invoiceNumber: inv.number,
+      items: inv.items.map((it) => ({
+        description: it.description,
+        quantity: it.quantity,
+        unitPrice: it.unitPrice,
+        appliesTax: it.appliesTax,
+      })),
+    });
+  };
 
   const handleCancelInvoice = (inv: Invoice) => {
     if (confirm(`¿Está seguro de anular la factura ${inv.number} (${inv.ncf})? Esta acción revertirá los saldos pendientes.`)) {
@@ -271,6 +301,13 @@ export function InvoiceList({
                           >
                             <Eye className="h-3.5 w-3.5 mr-2 text-slate-600" />
                             Ver / Imprimir Factura
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleEmitAsEcf(inv)}
+                            className="cursor-pointer text-slate-800 font-medium"
+                          >
+                            <ShieldCheck className="h-3.5 w-3.5 mr-2 text-emerald-600" />
+                            Emitir como e-CF (DGII)
                           </DropdownMenuItem>
                           {inv.balance > 0 && inv.status !== "anulada" && (
                             <DropdownMenuItem

@@ -19,7 +19,9 @@ import {
   CheckCircle2,
   AlertTriangle,
   X,
+  ShieldCheck,
 } from "lucide-react";
+import { useEcfStore } from "@/features/ecf/store/useEcfStore";
 
 export function InvoiceDetailModal() {
   const {
@@ -29,6 +31,8 @@ export function InvoiceDetailModal() {
     openPaymentCreateModal,
     payments,
   } = useFinanceStore();
+
+  const { openEmitModal } = useEcfStore();
 
   if (!selectedInvoice) return null;
 
@@ -41,6 +45,32 @@ export function InvoiceDetailModal() {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleEmitAsEcf = () => {
+    const ecfTypeMap: Record<string, "E31" | "E32" | "E34" | "E44" | "E45"> = {
+      B01: "E31",
+      B02: "E32",
+      B14: "E44",
+      B15: "E45",
+    };
+    const targetType = ecfTypeMap[selectedInvoice.ncfType] || "E31";
+    closeInvoiceDetail();
+    openEmitModal({
+      ecfType: targetType,
+      rncComprador: selectedInvoice.clientRncCedula || "",
+      razonSocialComprador: selectedInvoice.clientName,
+      currency: selectedInvoice.currency,
+      exchangeRate: selectedInvoice.exchangeRate,
+      invoiceId: selectedInvoice.id,
+      invoiceNumber: selectedInvoice.number,
+      items: selectedInvoice.items.map((it) => ({
+        description: it.description,
+        quantity: it.quantity,
+        unitPrice: it.unitPrice,
+        appliesTax: it.appliesTax,
+      })),
+    });
   };
 
   return (
@@ -60,6 +90,15 @@ export function InvoiceDetailModal() {
           </div>
 
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleEmitAsEcf}
+              className="text-white border-slate-700 hover:bg-slate-800 text-xs h-7"
+            >
+              <ShieldCheck className="h-3.5 w-3.5 mr-1.5 text-emerald-400" />
+              Emitir como e-CF
+            </Button>
             {selectedInvoice.balance > 0 && selectedInvoice.status !== "anulada" && (
               <Button
                 size="sm"

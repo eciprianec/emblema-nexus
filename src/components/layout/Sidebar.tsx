@@ -13,7 +13,9 @@ import {
   FolderOpen,
   Receipt,
   Settings, 
-  LogOut 
+  LogOut,
+  ShieldCheck,
+  FileCode,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -28,6 +30,7 @@ const mainNavigation = [
   { name: 'Expedientes', href: '/expedientes', icon: Briefcase },
   { name: 'Documentos', href: '/documentos', icon: FolderOpen },
   { name: 'Finanzas', href: '/finanzas', icon: Receipt },
+  { name: 'Facturación e-CF', href: '/finanzas/ecf', icon: ShieldCheck },
   { name: 'Configuración', href: '/configuracion', icon: Settings },
 ];
 
@@ -76,7 +79,12 @@ export default function Sidebar({ user }: SidebarProps) {
       <div className="flex-1 overflow-y-auto py-4">
         <nav className="space-y-1 px-2">
           {mainNavigation.map((item) => {
-            const isActive = pathname.startsWith(item.href);
+            const isActive =
+              item.href === '/finanzas'
+                ? pathname === '/finanzas' || (pathname.startsWith('/finanzas') && !pathname.startsWith('/finanzas/ecf'))
+                : item.href === '/configuracion'
+                ? pathname === '/configuracion' || (pathname.startsWith('/configuracion') && !pathname.startsWith('/configuracion/ecf'))
+                : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.name}
@@ -101,6 +109,28 @@ export default function Sidebar({ user }: SidebarProps) {
               </Link>
             );
           })}
+
+          <div className="pt-2 mt-2 border-t border-slate-850">
+            <Link
+              href="/configuracion/ecf"
+              className={cn(
+                "group flex items-center rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                pathname.startsWith('/configuracion/ecf')
+                  ? "bg-slate-800 text-white"
+                  : "text-slate-400 hover:bg-slate-900 hover:text-white"
+              )}
+              title={isCollapsed ? 'Configuración e-CF' : undefined}
+            >
+              <FileCode
+                className={cn(
+                  "h-4 w-4 flex-shrink-0",
+                  pathname.startsWith('/configuracion/ecf') ? "text-emerald-400" : "text-slate-500 group-hover:text-white",
+                  isCollapsed ? "mr-0" : "mr-3"
+                )}
+              />
+              {!isCollapsed && <span>Configuración e-CF</span>}
+            </Link>
+          </div>
         </nav>
       </div>
 

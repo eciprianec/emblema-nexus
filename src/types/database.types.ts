@@ -1569,6 +1569,312 @@ export type Database = {
         };
         Relationships: GenericRelationship[];
       };
+      ecf_configs: {
+        Row: {
+          id: string;
+          company_id: string;
+          environment: "DEV" | "CERT" | "PROD";
+          rnc: string;
+          business_name: string;
+          trade_name: string | null;
+          economic_activity: string | null;
+          certificate_alias: string | null;
+          certificate_expiry: string | null;
+          has_certificate: boolean | null;
+          certificate_data: string | null;
+          certificate_password_hash: string | null;
+          auto_send_dgii: boolean | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          environment?: "DEV" | "CERT" | "PROD";
+          rnc: string;
+          business_name: string;
+          trade_name?: string | null;
+          economic_activity?: string | null;
+          certificate_alias?: string | null;
+          certificate_expiry?: string | null;
+          has_certificate?: boolean | null;
+          certificate_data?: string | null;
+          certificate_password_hash?: string | null;
+          auto_send_dgii?: boolean | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          environment?: "DEV" | "CERT" | "PROD";
+          rnc?: string;
+          business_name?: string;
+          trade_name?: string | null;
+          economic_activity?: string | null;
+          certificate_alias?: string | null;
+          certificate_expiry?: string | null;
+          has_certificate?: boolean | null;
+          certificate_data?: string | null;
+          certificate_password_hash?: string | null;
+          auto_send_dgii?: boolean | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
+      ecf_sequences: {
+        Row: {
+          id: string;
+          company_id: string;
+          ecf_type:
+            | "E31"
+            | "E32"
+            | "E33"
+            | "E34"
+            | "E41"
+            | "E43"
+            | "E44"
+            | "E45"
+            | "E46"
+            | "E47";
+          series: string | null;
+          current_number: number;
+          start_number: number;
+          end_number: number;
+          expiration_date: string;
+          is_active: boolean | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          ecf_type:
+            | "E31"
+            | "E32"
+            | "E33"
+            | "E34"
+            | "E41"
+            | "E43"
+            | "E44"
+            | "E45"
+            | "E46"
+            | "E47";
+          series?: string | null;
+          current_number?: number;
+          start_number?: number;
+          end_number: number;
+          expiration_date: string;
+          is_active?: boolean | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          ecf_type?:
+            | "E31"
+            | "E32"
+            | "E33"
+            | "E34"
+            | "E41"
+            | "E43"
+            | "E44"
+            | "E45"
+            | "E46"
+            | "E47";
+          series?: string | null;
+          current_number?: number;
+          start_number?: number;
+          end_number?: number;
+          expiration_date?: string;
+          is_active?: boolean | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
+      ecf_invoices: {
+        Row: {
+          id: string;
+          company_id: string;
+          invoice_id: string | null;
+          encf: string;
+          ecf_type:
+            | "E31"
+            | "E32"
+            | "E33"
+            | "E34"
+            | "E41"
+            | "E43"
+            | "E44"
+            | "E45"
+            | "E46"
+            | "E47";
+          environment: "DEV" | "CERT" | "PROD";
+          security_code: string;
+          sign_date: string | null;
+          xml_unsigned: string | null;
+          xml_signed: string | null;
+          track_id: string | null;
+          dgii_status:
+            | "borrador"
+            | "firmado"
+            | "enviado"
+            | "aceptado"
+            | "rechazado"
+            | "condicional"
+            | "en_proceso"
+            | "anulado";
+          dgii_status_code: string | null;
+          dgii_messages: Json | null;
+          qr_code_url: string | null;
+          buyer_acceptance_status: "pendiente" | "aprobado" | "rechazado";
+          buyer_acceptance_date: string | null;
+          buyer_rejection_reason: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          invoice_id?: string | null;
+          encf: string;
+          ecf_type:
+            | "E31"
+            | "E32"
+            | "E33"
+            | "E34"
+            | "E41"
+            | "E43"
+            | "E44"
+            | "E45"
+            | "E46"
+            | "E47";
+          environment?: "DEV" | "CERT" | "PROD";
+          security_code: string;
+          sign_date?: string | null;
+          xml_unsigned?: string | null;
+          xml_signed?: string | null;
+          track_id?: string | null;
+          dgii_status?:
+            | "borrador"
+            | "firmado"
+            | "enviado"
+            | "aceptado"
+            | "rechazado"
+            | "condicional"
+            | "en_proceso"
+            | "anulado";
+          dgii_status_code?: string | null;
+          dgii_messages?: Json | null;
+          qr_code_url?: string | null;
+          buyer_acceptance_status?: "pendiente" | "aprobado" | "rechazado";
+          buyer_acceptance_date?: string | null;
+          buyer_rejection_reason?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          invoice_id?: string | null;
+          encf?: string;
+          ecf_type?:
+            | "E31"
+            | "E32"
+            | "E33"
+            | "E34"
+            | "E41"
+            | "E43"
+            | "E44"
+            | "E45"
+            | "E46"
+            | "E47";
+          environment?: "DEV" | "CERT" | "PROD";
+          security_code?: string;
+          sign_date?: string | null;
+          xml_unsigned?: string | null;
+          xml_signed?: string | null;
+          track_id?: string | null;
+          dgii_status?:
+            | "borrador"
+            | "firmado"
+            | "enviado"
+            | "aceptado"
+            | "rechazado"
+            | "condicional"
+            | "en_proceso"
+            | "anulado";
+          dgii_status_code?: string | null;
+          dgii_messages?: Json | null;
+          qr_code_url?: string | null;
+          buyer_acceptance_status?: "pendiente" | "aprobado" | "rechazado";
+          buyer_acceptance_date?: string | null;
+          buyer_rejection_reason?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
+      ecf_receptions: {
+        Row: {
+          id: string;
+          company_id: string;
+          emitter_rnc: string;
+          emitter_name: string;
+          encf: string;
+          ecf_type: string;
+          issue_date: string;
+          total_amount: number;
+          itbis_amount: number;
+          security_code: string | null;
+          commercial_status: "pendiente" | "aprobado" | "rechazado";
+          commercial_rejection_reason: string | null;
+          xml_received: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          emitter_rnc: string;
+          emitter_name: string;
+          encf: string;
+          ecf_type: string;
+          issue_date: string;
+          total_amount: number;
+          itbis_amount?: number;
+          security_code?: string | null;
+          commercial_status?: "pendiente" | "aprobado" | "rechazado";
+          commercial_rejection_reason?: string | null;
+          xml_received?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          emitter_rnc?: string;
+          emitter_name?: string;
+          encf?: string;
+          ecf_type?: string;
+          issue_date?: string;
+          total_amount?: number;
+          itbis_amount?: number;
+          security_code?: string | null;
+          commercial_status?: "pendiente" | "aprobado" | "rechazado";
+          commercial_rejection_reason?: string | null;
+          xml_received?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
       entity_revisions: {
         Row: {
           id: string;

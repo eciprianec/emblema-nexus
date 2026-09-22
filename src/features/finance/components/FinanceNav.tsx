@@ -12,6 +12,7 @@ import {
   Wallet,
   Building2,
   Plus,
+  ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -22,10 +23,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useFinanceStore } from "../store/useFinanceStore";
+import { useEcfStore } from "@/features/ecf/store/useEcfStore";
 
 const navItems = [
   { href: "/finanzas", label: "Resumen", icon: LayoutDashboard, exact: true },
   { href: "/finanzas/facturas", label: "Facturas", icon: FileText },
+  { href: "/finanzas/ecf", label: "Facturación e-CF", icon: ShieldCheck },
   { href: "/finanzas/cotizaciones", label: "Cotizaciones", icon: FileCheck },
   { href: "/finanzas/cxc", label: "CxC y Cobranzas", icon: Clock },
   { href: "/finanzas/pagos", label: "Cobros e Ingresos", icon: ArrowDownLeft },
@@ -42,6 +45,7 @@ export function FinanceNav() {
     openPaymentCreateModal,
     openExpenseCreateModal,
   } = useFinanceStore();
+  const { openEmitModal } = useEcfStore();
 
   return (
     <div className="border-b border-slate-200 bg-white sticky top-0 z-10 pb-1 pt-1 -mt-2 mb-6">
@@ -87,6 +91,13 @@ export function FinanceNav() {
               >
                 <FileText className="h-4 w-4 mr-2 text-slate-500" />
                 Nueva Factura (NCF)
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => openEmitModal()}
+                className="text-xs cursor-pointer py-2 font-medium text-slate-900"
+              >
+                <ShieldCheck className="h-4 w-4 mr-2 text-emerald-600" />
+                Emitir e-CF (Factura Electrónica)
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => openQuoteCreateModal()}
