@@ -8,6 +8,8 @@ import { TasksList } from "./TasksList";
 import { ChecklistManager } from "@/features/documents/components/ChecklistManager";
 import { DocumentList } from "@/features/documents/components/DocumentList";
 import { TemplateGeneratorModal } from "@/features/documents/components/TemplateGeneratorModal";
+import { CaseFinanceTab } from "@/features/finance/components/CaseFinanceTab";
+import { FinanceModals } from "@/features/finance/components/FinanceModals";
 
 export function CaseDetail({ caseId }: { caseId: string }) {
   const [activeTab, setActiveTab] = useState("resumen");
@@ -17,6 +19,7 @@ export function CaseDetail({ caseId }: { caseId: string }) {
     { id: "workflow", label: "Proceso / Workflow" },
     { id: "tareas", label: "Tareas" },
     { id: "documentos", label: "Documentos" },
+    { id: "finanzas", label: "Finanzas" },
     { id: "participantes", label: "Participantes" },
     { id: "bitacora", label: "Bitácora" },
     { id: "versiones", label: "Versiones (Snapshots)" },
@@ -99,6 +102,8 @@ export function CaseDetail({ caseId }: { caseId: string }) {
           </div>
         )}
 
+        {activeTab === "finanzas" && <CaseFinanceTab caseId={caseId} />}
+
         {activeTab === "bitacora" && (
           <div>
             <h3 className="text-lg font-medium text-slate-900 mb-4">Línea de Tiempo y Bitácora</h3>
@@ -113,6 +118,7 @@ export function CaseDetail({ caseId }: { caseId: string }) {
           </div>
         )}
       </div>
+      <FinanceModals />
     </div>
   );
 }

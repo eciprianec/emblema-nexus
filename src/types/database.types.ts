@@ -1098,6 +1098,477 @@ export type Database = {
         };
         Relationships: GenericRelationship[];
       };
+      quotes: {
+        Row: {
+          id: string;
+          company_id: string;
+          quote_number: string;
+          client_id: string;
+          case_id: string | null;
+          currency: "DOP" | "USD";
+          exchange_rate: number | null;
+          subtotal: number;
+          itbis: number;
+          discount: number;
+          total: number;
+          status: "borrador" | "enviada" | "aprobada" | "rechazada" | "facturada" | "vencida";
+          valid_until: string | null;
+          terms_and_conditions: string | null;
+          notes: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          quote_number: string;
+          client_id: string;
+          case_id?: string | null;
+          currency?: "DOP" | "USD";
+          exchange_rate?: number | null;
+          subtotal?: number;
+          itbis?: number;
+          discount?: number;
+          total?: number;
+          status?: "borrador" | "enviada" | "aprobada" | "rechazada" | "facturada" | "vencida";
+          valid_until?: string | null;
+          terms_and_conditions?: string | null;
+          notes?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          quote_number?: string;
+          client_id?: string;
+          case_id?: string | null;
+          currency?: "DOP" | "USD";
+          exchange_rate?: number | null;
+          subtotal?: number;
+          itbis?: number;
+          discount?: number;
+          total?: number;
+          status?: "borrador" | "enviada" | "aprobada" | "rechazada" | "facturada" | "vencida";
+          valid_until?: string | null;
+          terms_and_conditions?: string | null;
+          notes?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
+      quote_items: {
+        Row: {
+          id: string;
+          quote_id: string;
+          description: string;
+          item_type: "servicio" | "honorarios" | "tasa_judicial" | "tasa_catastral" | "gasto_notarial" | "otro";
+          quantity: number;
+          unit_price: number;
+          applies_itbis: boolean | null;
+          itbis_amount: number;
+          total: number;
+          order_index: number | null;
+        };
+        Insert: {
+          id?: string;
+          quote_id: string;
+          description: string;
+          item_type?: "servicio" | "honorarios" | "tasa_judicial" | "tasa_catastral" | "gasto_notarial" | "otro";
+          quantity?: number;
+          unit_price?: number;
+          applies_itbis?: boolean | null;
+          itbis_amount?: number;
+          total?: number;
+          order_index?: number | null;
+        };
+        Update: {
+          id?: string;
+          quote_id?: string;
+          description?: string;
+          item_type?: "servicio" | "honorarios" | "tasa_judicial" | "tasa_catastral" | "gasto_notarial" | "otro";
+          quantity?: number;
+          unit_price?: number;
+          applies_itbis?: boolean | null;
+          itbis_amount?: number;
+          total?: number;
+          order_index?: number | null;
+        };
+        Relationships: GenericRelationship[];
+      };
+      invoices: {
+        Row: {
+          id: string;
+          company_id: string;
+          invoice_number: string;
+          ncf_type: "B01" | "B02" | "B14" | "B15" | "ninguno" | null;
+          ncf: string | null;
+          client_id: string;
+          case_id: string | null;
+          quote_id: string | null;
+          issue_date: string;
+          due_date: string;
+          currency: "DOP" | "USD";
+          exchange_rate: number | null;
+          subtotal: number;
+          itbis: number;
+          discount: number;
+          total: number;
+          paid_amount: number;
+          balance_due: number;
+          status: "borrador" | "emitida" | "parcialmente_pagada" | "pagada" | "vencida" | "anulada";
+          payment_terms: string | null;
+          notes: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          invoice_number: string;
+          ncf_type?: "B01" | "B02" | "B14" | "B15" | "ninguno" | null;
+          ncf?: string | null;
+          client_id: string;
+          case_id?: string | null;
+          quote_id?: string | null;
+          issue_date?: string;
+          due_date: string;
+          currency?: "DOP" | "USD";
+          exchange_rate?: number | null;
+          subtotal?: number;
+          itbis?: number;
+          discount?: number;
+          total?: number;
+          paid_amount?: number;
+          balance_due?: number;
+          status?: "borrador" | "emitida" | "parcialmente_pagada" | "pagada" | "vencida" | "anulada";
+          payment_terms?: string | null;
+          notes?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          invoice_number?: string;
+          ncf_type?: "B01" | "B02" | "B14" | "B15" | "ninguno" | null;
+          ncf?: string | null;
+          client_id?: string;
+          case_id?: string | null;
+          quote_id?: string | null;
+          issue_date?: string;
+          due_date?: string;
+          currency?: "DOP" | "USD";
+          exchange_rate?: number | null;
+          subtotal?: number;
+          itbis?: number;
+          discount?: number;
+          total?: number;
+          paid_amount?: number;
+          balance_due?: number;
+          status?: "borrador" | "emitida" | "parcialmente_pagada" | "pagada" | "vencida" | "anulada";
+          payment_terms?: string | null;
+          notes?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
+      invoice_items: {
+        Row: {
+          id: string;
+          invoice_id: string;
+          description: string;
+          item_type: "servicio" | "honorarios" | "tasa_judicial" | "tasa_catastral" | "gasto_notarial" | "otro";
+          quantity: number;
+          unit_price: number;
+          applies_itbis: boolean | null;
+          itbis_amount: number;
+          total: number;
+          order_index: number | null;
+        };
+        Insert: {
+          id?: string;
+          invoice_id: string;
+          description: string;
+          item_type?: "servicio" | "honorarios" | "tasa_judicial" | "tasa_catastral" | "gasto_notarial" | "otro";
+          quantity?: number;
+          unit_price?: number;
+          applies_itbis?: boolean | null;
+          itbis_amount?: number;
+          total?: number;
+          order_index?: number | null;
+        };
+        Update: {
+          id?: string;
+          invoice_id?: string;
+          description?: string;
+          item_type?: "servicio" | "honorarios" | "tasa_judicial" | "tasa_catastral" | "gasto_notarial" | "otro";
+          quantity?: number;
+          unit_price?: number;
+          applies_itbis?: boolean | null;
+          itbis_amount?: number;
+          total?: number;
+          order_index?: number | null;
+        };
+        Relationships: GenericRelationship[];
+      };
+      payments: {
+        Row: {
+          id: string;
+          company_id: string;
+          receipt_number: string;
+          client_id: string;
+          payment_date: string;
+          payment_method: "efectivo" | "transferencia" | "cheque" | "tarjeta" | "otro";
+          reference_number: string | null;
+          bank_name: string | null;
+          amount: number;
+          currency: "DOP" | "USD";
+          notes: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          receipt_number: string;
+          client_id: string;
+          payment_date?: string;
+          payment_method: "efectivo" | "transferencia" | "cheque" | "tarjeta" | "otro";
+          reference_number?: string | null;
+          bank_name?: string | null;
+          amount: number;
+          currency?: "DOP" | "USD";
+          notes?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          receipt_number?: string;
+          client_id?: string;
+          payment_date?: string;
+          payment_method?: "efectivo" | "transferencia" | "cheque" | "tarjeta" | "otro";
+          reference_number?: string | null;
+          bank_name?: string | null;
+          amount?: number;
+          currency?: "DOP" | "USD";
+          notes?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
+      payment_applications: {
+        Row: {
+          id: string;
+          payment_id: string;
+          invoice_id: string;
+          amount_applied: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          payment_id: string;
+          invoice_id: string;
+          amount_applied: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          payment_id?: string;
+          invoice_id?: string;
+          amount_applied?: number;
+          created_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
+      expenses: {
+        Row: {
+          id: string;
+          company_id: string;
+          expense_number: string;
+          case_id: string | null;
+          supplier_name: string | null;
+          supplier_rnc: string | null;
+          ncf: string | null;
+          expense_date: string;
+          category:
+            | "tasas_judiciales"
+            | "tasas_catastrales"
+            | "gastos_notariales"
+            | "peritajes"
+            | "viaticos_combustible"
+            | "suministros_oficina"
+            | "servicios_basicos"
+            | "honorarios_externos"
+            | "otro";
+          description: string;
+          amount: number;
+          itbis_paid: number | null;
+          total_amount: number;
+          currency: "DOP" | "USD";
+          payment_status: "pendiente" | "pagado" | "reembolsado";
+          is_billable_to_client: boolean | null;
+          is_reimbursed: boolean | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          expense_number: string;
+          case_id?: string | null;
+          supplier_name?: string | null;
+          supplier_rnc?: string | null;
+          ncf?: string | null;
+          expense_date?: string;
+          category:
+            | "tasas_judiciales"
+            | "tasas_catastrales"
+            | "gastos_notariales"
+            | "peritajes"
+            | "viaticos_combustible"
+            | "suministros_oficina"
+            | "servicios_basicos"
+            | "honorarios_externos"
+            | "otro";
+          description: string;
+          amount: number;
+          itbis_paid?: number | null;
+          total_amount: number;
+          currency?: "DOP" | "USD";
+          payment_status?: "pendiente" | "pagado" | "reembolsado";
+          is_billable_to_client?: boolean | null;
+          is_reimbursed?: boolean | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          expense_number?: string;
+          case_id?: string | null;
+          supplier_name?: string | null;
+          supplier_rnc?: string | null;
+          ncf?: string | null;
+          expense_date?: string;
+          category?:
+            | "tasas_judiciales"
+            | "tasas_catastrales"
+            | "gastos_notariales"
+            | "peritajes"
+            | "viaticos_combustible"
+            | "suministros_oficina"
+            | "servicios_basicos"
+            | "honorarios_externos"
+            | "otro";
+          description?: string;
+          amount?: number;
+          itbis_paid?: number | null;
+          total_amount?: number;
+          currency?: "DOP" | "USD";
+          payment_status?: "pendiente" | "pagado" | "reembolsado";
+          is_billable_to_client?: boolean | null;
+          is_reimbursed?: boolean | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
+      bank_accounts: {
+        Row: {
+          id: string;
+          company_id: string;
+          bank_name: string;
+          account_number: string;
+          account_type: "corriente" | "ahorros";
+          currency: "DOP" | "USD";
+          initial_balance: number;
+          current_balance: number;
+          is_active: boolean | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          bank_name: string;
+          account_number: string;
+          account_type?: "corriente" | "ahorros";
+          currency?: "DOP" | "USD";
+          initial_balance?: number;
+          current_balance?: number;
+          is_active?: boolean | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          bank_name?: string;
+          account_number?: string;
+          account_type?: "corriente" | "ahorros";
+          currency?: "DOP" | "USD";
+          initial_balance?: number;
+          current_balance?: number;
+          is_active?: boolean | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
+      cash_registers: {
+        Row: {
+          id: string;
+          company_id: string;
+          name: string;
+          currency: "DOP" | "USD";
+          initial_balance: number;
+          current_balance: number;
+          responsible_id: string | null;
+          status: "abierta" | "cerrada";
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          name: string;
+          currency?: "DOP" | "USD";
+          initial_balance?: number;
+          current_balance?: number;
+          responsible_id?: string | null;
+          status?: "abierta" | "cerrada";
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          name?: string;
+          currency?: "DOP" | "USD";
+          initial_balance?: number;
+          current_balance?: number;
+          responsible_id?: string | null;
+          status?: "abierta" | "cerrada";
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
       entity_revisions: {
         Row: {
           id: string;

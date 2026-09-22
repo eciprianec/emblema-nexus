@@ -24,7 +24,7 @@ export function QuickCreate() {
   const options = [
     { label: "Nuevo Cliente", href: "/clientes/nuevo" },
     { label: "Nuevo Expediente", href: "/expedientes/nuevo" },
-    { label: "Nueva Factura", href: "/facturas/nuevo" },
+    { label: "Nueva Factura", href: "/finanzas/facturas" },
     { label: "Nueva Tarea", href: "/tareas/nuevo" },
   ];
 

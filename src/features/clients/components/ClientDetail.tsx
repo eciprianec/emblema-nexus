@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { DocumentList } from "@/features/documents/components/DocumentList";
 import { DocumentUploader } from "@/features/documents/components/DocumentUploader";
+import { ClientFinanceTab } from "@/features/finance/components/ClientFinanceTab";
+import { FinanceModals } from "@/features/finance/components/FinanceModals";
 
 export function ClientDetail({ clientId }: { clientId: string }) {
   const [activeTab, setActiveTab] = useState("info");
@@ -11,7 +13,7 @@ export function ClientDetail({ clientId }: { clientId: string }) {
     { id: "info", label: "Información" },
     { id: "expedientes", label: "Expedientes" },
     { id: "documentos", label: "Documentos" },
-    { id: "finanzas", label: "Finanzas" },
+    { id: "finanzas", label: "Facturación y CxC" },
     { id: "historial", label: "Versiones e Historial" },
   ];
 
@@ -73,10 +75,7 @@ export function ClientDetail({ clientId }: { clientId: string }) {
           </div>
         )}
         {activeTab === "finanzas" && (
-          <div>
-            <h3 className="text-lg font-medium leading-6 text-slate-900 mb-4">Estado Financiero</h3>
-            <p className="text-sm text-slate-500">Módulo financiero en construcción.</p>
-          </div>
+          <ClientFinanceTab clientId={clientId} />
         )}
         {activeTab === "historial" && (
           <div>
@@ -85,6 +84,7 @@ export function ClientDetail({ clientId }: { clientId: string }) {
           </div>
         )}
       </div>
+      <FinanceModals />
     </div>
   );
 }

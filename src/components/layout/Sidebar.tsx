@@ -11,6 +11,7 @@ import {
   Users, 
   Briefcase, 
   FolderOpen,
+  Receipt,
   Settings, 
   LogOut 
 } from 'lucide-react';
@@ -26,6 +27,7 @@ const mainNavigation = [
   { name: 'Clientes', href: '/clientes', icon: Users },
   { name: 'Expedientes', href: '/expedientes', icon: Briefcase },
   { name: 'Documentos', href: '/documentos', icon: FolderOpen },
+  { name: 'Finanzas', href: '/finanzas', icon: Receipt },
   { name: 'Configuración', href: '/configuracion', icon: Settings },
 ];
 
