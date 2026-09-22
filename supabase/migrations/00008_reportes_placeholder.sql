@@ -1,0 +1,2 @@
+-- Migración 8: Reportes (Fase Futura)
+-- Se implementará en próximas fases.

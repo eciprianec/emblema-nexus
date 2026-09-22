@@ -1,0 +1,2 @@
+-- Migración 5: Finanzas (Fase Futura)
+-- Se implementará en próximas fases.

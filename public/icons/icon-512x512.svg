@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="nexusGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+  </defs>
+
+  <!-- Fondo redondeado empresarial -->
+  <rect width="512" height="512" rx="112" fill="url(#nexusGrad)" />
+  <rect width="504" height="504" x="4" y="4" rx="108" fill="none" stroke="#334155" stroke-width="8" opacity="0.4" />
+
+  <!-- Monograma geométrico estilizado EN (Emblema Nexus) -->
+  <g transform="translate(64, 64)">
+    <!-- Letra E estilizada -->
+    <path d="M 64 64 L 200 64 C 216 64 228 76 228 92 C 228 108 216 120 200 120 L 128 120 L 128 168 L 192 168 C 208 168 220 180 220 196 C 220 212 208 224 192 224 L 128 224 L 128 272 L 208 272 C 224 272 236 284 236 300 C 236 316 224 328 208 328 L 64 328 C 48 328 36 316 36 300 L 36 92 C 36 76 48 64 64 64 Z" fill="#f8fafc" />
+    
+    <!-- Letra N interconectada (Nexus) -->
+    <path d="M 236 64 L 272 64 C 284 64 294 70 300 80 L 332 232 L 332 92 C 332 76 344 64 360 64 L 368 64 C 384 64 396 76 396 92 L 396 300 C 396 316 384 328 368 328 L 332 328 C 320 328 310 322 304 312 L 272 160 L 272 300 C 272 316 260 328 244 328 L 236 328 C 220 328 208 316 208 300 L 208 92 C 208 76 220 64 236 64 Z" fill="url(#accentGrad)" />
+
+    <!-- Punto del Nexus -->
+    <circle cx="192" cy="196" r="16" fill="#38bdf8" />
+  </g>
+</svg>

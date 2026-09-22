@@ -1,0 +1,2 @@
+-- Migración 6: Facturación ECF (Fase Futura)
+-- Se implementará en próximas fases.
