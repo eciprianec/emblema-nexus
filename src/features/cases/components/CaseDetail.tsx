@@ -10,6 +10,8 @@ import { DocumentList } from "@/features/documents/components/DocumentList";
 import { TemplateGeneratorModal } from "@/features/documents/components/TemplateGeneratorModal";
 import { CaseFinanceTab } from "@/features/finance/components/CaseFinanceTab";
 import { FinanceModals } from "@/features/finance/components/FinanceModals";
+import { CaseSurveyTab } from "@/features/survey/components/CaseSurveyTab";
+import { SurveyModals } from "@/features/survey/components/SurveyModals";
 
 export function CaseDetail({ caseId }: { caseId: string }) {
   const [activeTab, setActiveTab] = useState("resumen");
@@ -19,6 +21,7 @@ export function CaseDetail({ caseId }: { caseId: string }) {
     { id: "workflow", label: "Proceso / Workflow" },
     { id: "tareas", label: "Tareas" },
     { id: "documentos", label: "Documentos" },
+    { id: "agrimensura", label: "Agrimensura / Parcela" },
     { id: "finanzas", label: "Finanzas" },
     { id: "participantes", label: "Participantes" },
     { id: "bitacora", label: "Bitácora" },
@@ -102,6 +105,8 @@ export function CaseDetail({ caseId }: { caseId: string }) {
           </div>
         )}
 
+        {activeTab === "agrimensura" && <CaseSurveyTab caseId={caseId} />}
+
         {activeTab === "finanzas" && <CaseFinanceTab caseId={caseId} />}
 
         {activeTab === "bitacora" && (
@@ -119,6 +124,7 @@ export function CaseDetail({ caseId }: { caseId: string }) {
         )}
       </div>
       <FinanceModals />
+      <SurveyModals />
     </div>
   );
 }

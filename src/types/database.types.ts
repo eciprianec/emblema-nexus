@@ -1875,6 +1875,432 @@ export type Database = {
         };
         Relationships: GenericRelationship[];
       };
+      cadastral_parcels: {
+        Row: {
+          id: string;
+          company_id: string;
+          case_id: string | null;
+          client_id: string | null;
+          designation: string;
+          title_number: string | null;
+          cadastral_district: string;
+          portion_number: string | null;
+          solar_number: string | null;
+          block_number: string | null;
+          province: string;
+          municipality: string;
+          sector: string | null;
+          address: string | null;
+          area_m2: number;
+          area_tareas: number | null;
+          perimeter_m: number | null;
+          utm_zone: string | null;
+          datum: string | null;
+          centroid_lat: number | null;
+          centroid_lng: number | null;
+          centroid_utm_north: number | null;
+          centroid_utm_east: number | null;
+          polygon_geometry: Json | null;
+          boundaries: Json | null;
+          status:
+            | "en_proceso"
+            | "sometido_dnmc"
+            | "observado"
+            | "aprobado_dnmc"
+            | "titulado"
+            | "rechazado";
+          notes: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          case_id?: string | null;
+          client_id?: string | null;
+          designation: string;
+          title_number?: string | null;
+          cadastral_district: string;
+          portion_number?: string | null;
+          solar_number?: string | null;
+          block_number?: string | null;
+          province: string;
+          municipality: string;
+          sector?: string | null;
+          address?: string | null;
+          area_m2: number;
+          area_tareas?: number | null;
+          perimeter_m?: number | null;
+          utm_zone?: string | null;
+          datum?: string | null;
+          centroid_lat?: number | null;
+          centroid_lng?: number | null;
+          centroid_utm_north?: number | null;
+          centroid_utm_east?: number | null;
+          polygon_geometry?: Json | null;
+          boundaries?: Json | null;
+          status?:
+            | "en_proceso"
+            | "sometido_dnmc"
+            | "observado"
+            | "aprobado_dnmc"
+            | "titulado"
+            | "rechazado";
+          notes?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          case_id?: string | null;
+          client_id?: string | null;
+          designation?: string;
+          title_number?: string | null;
+          cadastral_district?: string;
+          portion_number?: string | null;
+          solar_number?: string | null;
+          block_number?: string | null;
+          province?: string;
+          municipality?: string;
+          sector?: string | null;
+          address?: string | null;
+          area_m2?: number;
+          area_tareas?: number | null;
+          perimeter_m?: number | null;
+          utm_zone?: string | null;
+          datum?: string | null;
+          centroid_lat?: number | null;
+          centroid_lng?: number | null;
+          centroid_utm_north?: number | null;
+          centroid_utm_east?: number | null;
+          polygon_geometry?: Json | null;
+          boundaries?: Json | null;
+          status?:
+            | "en_proceso"
+            | "sometido_dnmc"
+            | "observado"
+            | "aprobado_dnmc"
+            | "titulado"
+            | "rechazado";
+          notes?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
+      cadastral_files: {
+        Row: {
+          id: string;
+          company_id: string;
+          case_id: string;
+          parcel_id: string | null;
+          operation_type:
+            | "deslinde"
+            | "subdivision"
+            | "refundicion"
+            | "urbanizacion"
+            | "actualizacion_parcelaria"
+            | "saneamiento"
+            | "replanteo"
+            | "modificacion_parcelaria"
+            | "otro";
+          dnmc_file_number: string | null;
+          regional_directorate:
+            | "central"
+            | "norte"
+            | "este"
+            | "noreste"
+            | "suroeste";
+          surveyor_id: string | null;
+          codia_number: string | null;
+          authorization_date: string | null;
+          field_work_date: string | null;
+          newspaper_publication_date: string | null;
+          submission_date: string | null;
+          current_stage:
+            | "solicitud_autorizacion"
+            | "aviso_publicacion"
+            | "trabajos_campo"
+            | "elaboracion_planos"
+            | "sometido_dnmc"
+            | "revision_tecnica"
+            | "oficio_observacion"
+            | "aprobado_dnmc"
+            | "en_tribunal_tierras"
+            | "en_registro_titulos"
+            | "concluido_titulado";
+          approval_date: string | null;
+          approval_resolution_number: string | null;
+          rejection_reason: string | null;
+          observation_details: string | null;
+          observation_due_date: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          case_id: string;
+          parcel_id?: string | null;
+          operation_type:
+            | "deslinde"
+            | "subdivision"
+            | "refundicion"
+            | "urbanizacion"
+            | "actualizacion_parcelaria"
+            | "saneamiento"
+            | "replanteo"
+            | "modificacion_parcelaria"
+            | "otro";
+          dnmc_file_number?: string | null;
+          regional_directorate:
+            | "central"
+            | "norte"
+            | "este"
+            | "noreste"
+            | "suroeste";
+          surveyor_id?: string | null;
+          codia_number?: string | null;
+          authorization_date?: string | null;
+          field_work_date?: string | null;
+          newspaper_publication_date?: string | null;
+          submission_date?: string | null;
+          current_stage?:
+            | "solicitud_autorizacion"
+            | "aviso_publicacion"
+            | "trabajos_campo"
+            | "elaboracion_planos"
+            | "sometido_dnmc"
+            | "revision_tecnica"
+            | "oficio_observacion"
+            | "aprobado_dnmc"
+            | "en_tribunal_tierras"
+            | "en_registro_titulos"
+            | "concluido_titulado";
+          approval_date?: string | null;
+          approval_resolution_number?: string | null;
+          rejection_reason?: string | null;
+          observation_details?: string | null;
+          observation_due_date?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          case_id?: string;
+          parcel_id?: string | null;
+          operation_type?:
+            | "deslinde"
+            | "subdivision"
+            | "refundicion"
+            | "urbanizacion"
+            | "actualizacion_parcelaria"
+            | "saneamiento"
+            | "replanteo"
+            | "modificacion_parcelaria"
+            | "otro";
+          dnmc_file_number?: string | null;
+          regional_directorate?:
+            | "central"
+            | "norte"
+            | "este"
+            | "noreste"
+            | "suroeste";
+          surveyor_id?: string | null;
+          codia_number?: string | null;
+          authorization_date?: string | null;
+          field_work_date?: string | null;
+          newspaper_publication_date?: string | null;
+          submission_date?: string | null;
+          current_stage?:
+            | "solicitud_autorizacion"
+            | "aviso_publicacion"
+            | "trabajos_campo"
+            | "elaboracion_planos"
+            | "sometido_dnmc"
+            | "revision_tecnica"
+            | "oficio_observacion"
+            | "aprobado_dnmc"
+            | "en_tribunal_tierras"
+            | "en_registro_titulos"
+            | "concluido_titulado";
+          approval_date?: string | null;
+          approval_resolution_number?: string | null;
+          rejection_reason?: string | null;
+          observation_details?: string | null;
+          observation_due_date?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
+      survey_points: {
+        Row: {
+          id: string;
+          company_id: string;
+          parcel_id: string;
+          point_name: string;
+          point_type:
+            | "vertice_lindero"
+            | "estacion_referencia"
+            | "punto_control_cors"
+            | "detalle_fisico"
+            | "arbol_mojon"
+            | "canal_rio"
+            | "calle_camino";
+          utm_north: number;
+          utm_east: number;
+          elevation: number | null;
+          latitude: number | null;
+          longitude: number | null;
+          order_index: number;
+          description: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          parcel_id: string;
+          point_name: string;
+          point_type?:
+            | "vertice_lindero"
+            | "estacion_referencia"
+            | "punto_control_cors"
+            | "detalle_fisico"
+            | "arbol_mojon"
+            | "canal_rio"
+            | "calle_camino";
+          utm_north: number;
+          utm_east: number;
+          elevation?: number | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          order_index: number;
+          description?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          parcel_id?: string;
+          point_name?: string;
+          point_type?:
+            | "vertice_lindero"
+            | "estacion_referencia"
+            | "punto_control_cors"
+            | "detalle_fisico"
+            | "arbol_mojon"
+            | "canal_rio"
+            | "calle_camino";
+          utm_north?: number;
+          utm_east?: number;
+          elevation?: number | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          order_index?: number;
+          description?: string | null;
+          created_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
+      survey_field_sessions: {
+        Row: {
+          id: string;
+          company_id: string;
+          cadastral_file_id: string;
+          session_date: string;
+          chief_surveyor_id: string | null;
+          equipment_type:
+            | "gps_gnss_rtk"
+            | "estacion_total"
+            | "nivel_optico"
+            | "dron_fotogrametrico"
+            | "mixto";
+          equipment_model: string | null;
+          calibration_certificate_number: string | null;
+          base_station_point: string | null;
+          weather_conditions: string | null;
+          witness_attendees: Json | null;
+          linear_closure_error: number | null;
+          angular_closure_error: number | null;
+          status:
+            | "programada"
+            | "en_curso"
+            | "completada"
+            | "reprogramada_lluvia"
+            | "suspendida_conflicto";
+          field_notes: string | null;
+          raw_file_url: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          cadastral_file_id: string;
+          session_date: string;
+          chief_surveyor_id?: string | null;
+          equipment_type:
+            | "gps_gnss_rtk"
+            | "estacion_total"
+            | "nivel_optico"
+            | "dron_fotogrametrico"
+            | "mixto";
+          equipment_model?: string | null;
+          calibration_certificate_number?: string | null;
+          base_station_point?: string | null;
+          weather_conditions?: string | null;
+          witness_attendees?: Json | null;
+          linear_closure_error?: number | null;
+          angular_closure_error?: number | null;
+          status?:
+            | "programada"
+            | "en_curso"
+            | "completada"
+            | "reprogramada_lluvia"
+            | "suspendida_conflicto";
+          field_notes?: string | null;
+          raw_file_url?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          cadastral_file_id?: string;
+          session_date?: string;
+          chief_surveyor_id?: string | null;
+          equipment_type?:
+            | "gps_gnss_rtk"
+            | "estacion_total"
+            | "nivel_optico"
+            | "dron_fotogrametrico"
+            | "mixto";
+          equipment_model?: string | null;
+          calibration_certificate_number?: string | null;
+          base_station_point?: string | null;
+          weather_conditions?: string | null;
+          witness_attendees?: Json | null;
+          linear_closure_error?: number | null;
+          angular_closure_error?: number | null;
+          status?:
+            | "programada"
+            | "en_curso"
+            | "completada"
+            | "reprogramada_lluvia"
+            | "suspendida_conflicto";
+          field_notes?: string | null;
+          raw_file_url?: string | null;
+          created_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
       entity_revisions: {
         Row: {
           id: string;
