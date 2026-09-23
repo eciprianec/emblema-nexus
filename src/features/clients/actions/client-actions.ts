@@ -36,9 +36,6 @@ export async function archiveClientAction(id: string) {
 export async function listClientsAction(params?: { search?: string, type?: string, status?: string }) {
   return {
     success: true,
-    data: [
-      { id: "cl_1", type: "FISICA", nombres: "Juan", apellidos: "Pérez", telefono: "809-555-1234", email: "juan@example.com" },
-      { id: "cl_2", type: "JURIDICA", razonSocial: "Empresa S.R.L.", rnc: "123456789", telefono: "809-555-9876", email: "contacto@empresa.com" }
-    ]
+    data: []
   };
 }

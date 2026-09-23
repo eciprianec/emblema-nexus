@@ -55,10 +55,6 @@ export function PublicCaseTracker({ initialCode = '' }: PublicCaseTrackerProps) 
     setCaseData(found);
   };
 
-  const handleSelectDemo = (code: string) => {
-    setInputCode(code);
-    handleSearch(code);
-  };
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto">
@@ -103,25 +99,6 @@ export function PublicCaseTracker({ initialCode = '' }: PublicCaseTrackerProps) 
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </form>
-
-        {/* Ejemplos de Códigos para Demostración */}
-        <div className="mt-4 pt-4 border-t border-slate-100 flex flex-wrap items-center gap-2 text-xs">
-          <span className="text-slate-500 font-medium">Códigos de prueba activos:</span>
-          <button
-            type="button"
-            onClick={() => handleSelectDemo('TRK-2026-X89B2')}
-            className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 font-mono font-semibold transition-colors border border-slate-200"
-          >
-            TRK-2026-X89B2 (Deslinde Higüey)
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSelectDemo('TRK-2026-D44K1')}
-            className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 font-mono font-semibold transition-colors border border-slate-200"
-          >
-            TRK-2026-D44K1 (Saneamiento Las Terrenas)
-          </button>
-        </div>
       </div>
 
       {/* Resultados de la Consulta */}

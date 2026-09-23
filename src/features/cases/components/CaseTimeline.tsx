@@ -1,9 +1,13 @@
 export function CaseTimeline({ caseId }: { caseId: string }) {
-  const events = [
-    { id: 1, type: "CREATION", title: "Expediente Creado", desc: "El expediente fue inicializado por Lic. Rodríguez", date: "Hace 2 días" },
-    { id: 2, type: "STAGE_CHANGE", title: "Paso a Evaluación", desc: "Se completó la recepción de documentos", date: "Ayer" },
-    { id: 3, type: "TASK_DONE", title: "Tarea Completada", desc: "Verificación de Títulos", date: "Hace 4 horas" }
-  ];
+  const events: Array<{ id: number; type: string; title: string; desc: string; date: string }> = [];
+
+  if (events.length === 0) {
+    return (
+      <div className="py-8 text-center text-sm text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+        No hay registros en la bitácora de este expediente aún.
+      </div>
+    );
+  }
 
   return (
     <div className="flow-root">

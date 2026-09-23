@@ -60,27 +60,33 @@ export function FieldSessionList() {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
-          {equipmentList.map((eq) => (
-            <div
-              key={eq.id}
-              className="p-2.5 rounded border border-slate-200 bg-slate-50/50 hover:bg-slate-100/60 transition-colors text-xs"
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-slate-900 truncate" title={eq.name}>
-                  {eq.name}
-                </span>
-                <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+        {equipmentList.length === 0 ? (
+          <div className="py-4 text-center text-xs text-slate-500 bg-slate-50 rounded border border-dashed border-slate-200">
+            No hay equipos topográficos registrados en el inventario.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
+            {equipmentList.map((eq) => (
+              <div
+                key={eq.id}
+                className="p-2.5 rounded border border-slate-200 bg-slate-50/50 hover:bg-slate-100/60 transition-colors text-xs"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-900 truncate" title={eq.name}>
+                    {eq.name}
+                  </span>
+                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                </div>
+                <div className="text-[10px] text-slate-500 font-mono mt-1">
+                  S/N: {eq.serialNumber}
+                </div>
+                <div className="text-[10px] text-slate-600 mt-0.5">
+                  Calibración: {eq.calibrationExpiry}
+                </div>
               </div>
-              <div className="text-[10px] text-slate-500 font-mono mt-1">
-                S/N: {eq.serialNumber}
-              </div>
-              <div className="text-[10px] text-slate-600 mt-0.5">
-                Calibración: {eq.calibrationExpiry}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Lista de Jornadas de Campo */}
@@ -105,7 +111,16 @@ export function FieldSessionList() {
         </div>
 
         <div className="space-y-4">
-          {fieldSessions.map((session) => {
+          {fieldSessions.length === 0 ? (
+            <div className="bg-white p-8 rounded-lg border border-slate-200 text-center text-slate-500">
+              <Calendar className="h-8 w-8 mx-auto text-slate-300 mb-2 stroke-1" />
+              <p className="font-medium text-slate-700">No hay jornadas de campo programadas</p>
+              <p className="text-xs text-slate-500 mt-1">
+                Programe una nueva jornada de medición para asignar brigadas y registrar actas de linderos.
+              </p>
+            </div>
+          ) : (
+            fieldSessions.map((session) => {
             const parcel = parcels.find((p) => p.id === session.parcelId);
 
             return (
@@ -237,7 +252,7 @@ export function FieldSessionList() {
                 </div>
               </div>
             );
-          })}
+          }))}
         </div>
       </div>
     </div>

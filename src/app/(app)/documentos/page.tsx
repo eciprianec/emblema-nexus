@@ -47,14 +47,10 @@ export default function DocumentosPage() {
           </Card>
         </TabsContent>
         
-        {/* Mock for other tabs to re-use the same list for demo purposes */}
         <TabsContent value="legal">
           <Card className="shadow-sm border-slate-200">
             <CardContent className="pt-6">
-              <DocumentList documents={[
-                { id: '1', name: 'Contrato de Servicios - Final.docx', version: 'v3', size: 1024 * 500, status: 'Firmado', date: new Date(2026, 8, 15), type: 'Legal' },
-                { id: '4', name: 'Borrador Poder Especial.docx', version: 'v2', size: 1024 * 120, status: 'Borrador', date: new Date(2026, 8, 22), type: 'Legal' },
-              ]} />
+              <DocumentList documents={[]} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -62,9 +58,7 @@ export default function DocumentosPage() {
         <TabsContent value="agrimensura">
           <Card className="shadow-sm border-slate-200">
             <CardContent className="pt-6">
-              <DocumentList documents={[
-                { id: '2', name: 'Plano Mensura_Lote4B.pdf', version: 'v1', size: 1024 * 1024 * 2.5, status: 'En revisión', date: new Date(2026, 8, 20), type: 'Agrimensura' },
-              ]} />
+              <DocumentList documents={[]} />
             </CardContent>
           </Card>
         </TabsContent>

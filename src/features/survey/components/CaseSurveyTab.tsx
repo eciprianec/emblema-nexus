@@ -34,11 +34,9 @@ export function CaseSurveyTab({ caseId }: CaseSurveyTabProps) {
   } = useSurveyStore();
 
   // Buscar parcelas vinculadas a este caso
-  const caseParcels = parcels.filter(
-    (p) => p.caseId === caseId || (!p.caseId && caseId === "LEG-2024-0001" && p.id === "parc-1")
-  );
+  const caseParcels = parcels.filter((p) => p.caseId === caseId);
 
-  const activeParcel = caseParcels[0] || parcels[0];
+  const activeParcel = caseParcels[0] || null;
   const linkedCadastralFile = activeParcel
     ? cadastralFiles.find(
         (c) => c.parcelId === activeParcel.id || c.id === activeParcel.cadastralFileId

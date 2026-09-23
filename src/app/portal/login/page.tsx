@@ -27,7 +27,6 @@ function LoginFormContent() {
   const {
     loginWithPin,
     loginWithMagicToken,
-    loginDemo,
     isAuthenticated,
   } = useClientPortalStore();
 
@@ -88,11 +87,6 @@ function LoginFormContent() {
     }
   };
 
-  const handleQuickDemo = (clientId: string) => {
-    loginDemo(clientId);
-    toast.success('Iniciando sesión en modo demostración...');
-    router.push('/portal');
-  };
 
   return (
     <div className="max-w-md mx-auto py-6 sm:py-12 space-y-8">
@@ -185,37 +179,6 @@ function LoginFormContent() {
             </form>
           </TabsContent>
         </Tabs>
-
-        {/* Acceso Rápido para Demostración */}
-        <div className="pt-4 border-t border-slate-100 space-y-2">
-          <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block text-center">
-            Accesos de Demostración Rápida
-          </span>
-          <div className="grid grid-cols-1 gap-2">
-            <button
-              type="button"
-              onClick={() => handleQuickDemo('CLI-001')}
-              className="p-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-left transition-colors flex items-center justify-between text-xs"
-            >
-              <div>
-                <span className="font-bold text-slate-900 block">Ing. Alejandro Morales</span>
-                <span className="text-[11px] text-slate-500">Inversiones Caribeñas (PIN: 202642)</span>
-              </div>
-              <Sparkles className="w-4 h-4 text-amber-600" />
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickDemo('CLI-002')}
-              className="p-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-left transition-colors flex items-center justify-between text-xs"
-            >
-              <div>
-                <span className="font-bold text-slate-900 block">Dra. María Altagracia Peña</span>
-                <span className="text-[11px] text-slate-500">Consultores Peña (PIN: 883012)</span>
-              </div>
-              <Sparkles className="w-4 h-4 text-amber-600" />
-            </button>
-          </div>
-        </div>
       </div>
 
       {/* Enlaces de Ayuda */}

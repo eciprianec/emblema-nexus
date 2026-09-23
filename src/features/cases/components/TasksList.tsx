@@ -29,10 +29,8 @@ export function TasksList({ caseId }: TasksListProps) {
   const { tasks, moveTaskStatus, openCreateModal, openEditModal } = useTaskStore();
   const [filterStatus, setFilterStatus] = useState<string>("todas");
 
-  // Filtrar tareas que correspondan a este expediente (o genéricas para demostración)
-  const caseTasks = tasks.filter(
-    (t) => t.caseId === caseId || t.caseId === "case_1" || !t.caseId
-  );
+  // Filtrar tareas que correspondan a este expediente
+  const caseTasks = tasks.filter((t) => t.caseId === caseId);
 
   const filteredTasks = filterStatus === "todas" 
     ? caseTasks 

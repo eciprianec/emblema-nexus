@@ -15,12 +15,7 @@ interface DocumentVersionHistoryProps {
 }
 
 export function DocumentVersionHistory({ documentId, open, onOpenChange }: DocumentVersionHistoryProps) {
-  // Mock history data based on documentId
-  const history = [
-    { id: 'v3', version: 'v3', summary: 'Se incluyeron las cláusulas adicionales solicitadas por el cliente.', size: 1024 * 512, date: new Date(2026, 8, 15, 14, 30), user: 'Ana Martínez' },
-    { id: 'v2', version: 'v2', summary: 'Corrección de errores tipográficos en los datos de la propiedad.', size: 1024 * 508, date: new Date(2026, 8, 14, 10, 15), user: 'Carlos Ruiz' },
-    { id: 'v1', version: 'v1', summary: 'Versión inicial generada desde la plantilla.', size: 1024 * 500, date: new Date(2026, 8, 12, 16, 45), user: 'Sistema' },
-  ];
+  const history: Array<{ id: string; version: string; summary: string; size: number; date: Date; user: string }> = [];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -37,7 +32,12 @@ export function DocumentVersionHistory({ documentId, open, onOpenChange }: Docum
 
         <ScrollArea className="h-[400px] pr-4 mt-4">
           <div className="space-y-6">
-            {history.map((item, index) => (
+            {history.length === 0 ? (
+              <div className="py-12 text-center text-sm text-slate-500">
+                No hay versiones previas registradas para este documento.
+              </div>
+            ) : (
+              history.map((item, index) => (
               <div key={item.id} className="relative pl-6 pb-6 border-l border-slate-200 last:border-0 last:pb-0">
                 <div className="absolute -left-[5px] top-1 h-[9px] w-[9px] rounded-full bg-slate-300 ring-4 ring-white" />
                 
@@ -73,7 +73,7 @@ export function DocumentVersionHistory({ documentId, open, onOpenChange }: Docum
                   </span>
                 </div>
               </div>
-            ))}
+            )))}
           </div>
         </ScrollArea>
       </DialogContent>

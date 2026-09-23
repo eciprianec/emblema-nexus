@@ -3,10 +3,7 @@
 import { useState } from "react";
 
 export function ParticipantsList({ caseId }: { caseId: string }) {
-  const [participants] = useState([
-    { id: 1, name: "Juan Pérez", role: "Cliente / Demandante", contact: "809-555-1234" },
-    { id: 2, name: "María Gómez", role: "Abogado Contraparte", contact: "829-555-9876" }
-  ]);
+  const [participants] = useState<Array<{ id: number; name: string; role: string; contact: string }>>([]);
 
   return (
     <div>
@@ -28,18 +25,26 @@ export function ParticipantsList({ caseId }: { caseId: string }) {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-slate-200">
-            {participants.map(p => (
-              <tr key={p.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{p.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                  <span className="bg-slate-100 text-slate-800 px-2 py-0.5 rounded text-xs">{p.role}</span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{p.contact}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
-                  <button className="text-red-600 hover:text-red-800 text-xs">Remover</button>
+            {participants.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="px-6 py-8 text-center text-slate-500 text-sm">
+                  No hay participantes registrados en este expediente.
                 </td>
               </tr>
-            ))}
+            ) : (
+              participants.map(p => (
+                <tr key={p.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{p.name}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                    <span className="bg-slate-100 text-slate-800 px-2 py-0.5 rounded text-xs">{p.role}</span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{p.contact}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
+                    <button className="text-red-600 hover:text-red-800 text-xs">Remover</button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

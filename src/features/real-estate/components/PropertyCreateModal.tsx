@@ -135,7 +135,7 @@ export function PropertyCreateModal() {
   const [ownerIdNumber, setOwnerIdNumber] = useState("");
   const [commissionPercent, setCommissionPercent] = useState<string>("5.0");
   const [isExclusive, setIsExclusive] = useState<boolean>(true);
-  const [agentName, setAgentName] = useState("Lic. Claudia Reynoso");
+  const [agentName, setAgentName] = useState("");
 
   // Reactividad instantánea m² a Tareas dominicanas
   const numericLandSqm = parseFloat(landAreaSqm) || 0;

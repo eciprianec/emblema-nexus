@@ -33,12 +33,7 @@ const EVENT_TYPE_LABELS: Record<EventType, string> = {
   otro: "Otro",
 };
 
-const AVAILABLE_CASES = [
-  { id: "case_1", number: "LEG-2024-0001", title: "Divorcio y Partición de Bienes" },
-  { id: "case_2", number: "AGR-2024-0042", title: "Deslinde y Subdivisión Parcela 15" },
-  { id: "case_3", number: "INM-2024-0018", title: "Regularización Título Turístico" },
-  { id: "case_4", number: "LEG-2024-0105", title: "Reclamación de Daños y Perjuicios" },
-];
+const AVAILABLE_CASES: Array<{ id: string; number: string; title: string }> = [];
 
 const REMINDER_OPTIONS = [
   { value: "0", label: "Sin recordatorio" },

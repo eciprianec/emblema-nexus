@@ -32,24 +32,33 @@ export default function ClientList() {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-slate-200 text-sm">
-          {clients.map(client => (
-            <tr key={client.id}>
-              <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-900">
-                {client.type === "FISICA" ? `${client.nombres} ${client.apellidos}` : client.razonSocial}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-slate-500">
-                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${client.type === 'FISICA' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>
-                  {client.type === "FISICA" ? "Física" : "Jurídica"}
-                </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-slate-500">
-                {client.email}<br/>{client.telefono}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <a href={`/clientes/${client.id}`} className="text-slate-600 hover:text-slate-900">Ver Detalles</a>
+          {clients.length === 0 ? (
+            <tr>
+              <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
+                <p className="text-base font-medium text-slate-700">No hay clientes registrados</p>
+                <p className="text-sm mt-1">Haga clic en "+ Nuevo Cliente" para dar de alta el primer cliente.</p>
               </td>
             </tr>
-          ))}
+          ) : (
+            clients.map(client => (
+              <tr key={client.id}>
+                <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-900">
+                  {client.type === "FISICA" ? `${client.nombres} ${client.apellidos}` : client.razonSocial}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-slate-500">
+                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${client.type === 'FISICA' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>
+                    {client.type === "FISICA" ? "Física" : "Jurídica"}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-slate-500">
+                  {client.email}<br/>{client.telefono}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <a href={`/clientes/${client.id}`} className="text-slate-600 hover:text-slate-900">Ver Detalles</a>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

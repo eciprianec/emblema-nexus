@@ -22,7 +22,7 @@ export function CaseDetail({ caseId }: { caseId: string }) {
   const [activeTab, setActiveTab] = useState("resumen");
   const [copiedLink, setCopiedLink] = useState(false);
 
-  const trackingCode = caseId.includes("D44K1") ? "TRK-2026-D44K1" : "TRK-2026-X89B2";
+  const trackingCode = `TRK-2026-${(caseId || "00000").slice(-5).toUpperCase()}`;
 
   const handleCopyLink = () => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
@@ -118,7 +118,7 @@ export function CaseDetail({ caseId }: { caseId: string }) {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
                 <span className="text-slate-500 block">Número</span>
-                <span className="font-medium text-slate-900">LEG-2024-0001</span>
+                <span className="font-medium text-slate-900">{caseId}</span>
               </div>
               <div>
                 <span className="text-slate-500 block">Estado Actual</span>
@@ -126,7 +126,7 @@ export function CaseDetail({ caseId }: { caseId: string }) {
               </div>
               <div>
                 <span className="text-slate-500 block">Responsable</span>
-                <span className="font-medium text-slate-900">Lic. Rodríguez</span>
+                <span className="font-medium text-slate-900">Por Asignar</span>
               </div>
               <div>
                 <span className="text-slate-500 block">Prioridad</span>

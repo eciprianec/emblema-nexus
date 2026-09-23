@@ -57,8 +57,8 @@ export function ContractCreateModal() {
   const [clientEmail, setClientEmail] = useState("");
 
   const [ownerName, setOwnerName] = useState("");
-  const [agentName, setAgentName] = useState("Lic. Claudia Reynoso");
-  const [notaryName, setNotaryName] = useState("Dr. Fausto Pichardo (Notario Público)");
+  const [agentName, setAgentName] = useState("");
+  const [notaryName, setNotaryName] = useState("");
   const [notes, setNotes] = useState("");
 
   // Autoseleccionar propiedad si se abrió desde una propiedad

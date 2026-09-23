@@ -57,8 +57,11 @@ export default function Sidebar({ user }: SidebarProps) {
   const router = useRouter();
 
   const handleLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+    document.cookie = "nexus_admin_session=; path=/; max-age=0";
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } catch {}
     router.push('/login');
     router.refresh();
   };

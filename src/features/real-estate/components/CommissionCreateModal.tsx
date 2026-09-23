@@ -40,8 +40,8 @@ export function CommissionCreateModal() {
   const [currency, setCurrency] = useState<Currency>("USD");
   const [transactionAmount, setTransactionAmount] = useState<string>("");
   const [commissionPercent, setCommissionPercent] = useState<string>("5.0");
-  const [agentName, setAgentName] = useState("Lic. Claudia Reynoso");
-  const [agentRncOrCedula, setAgentRncOrCedula] = useState("001-1928374-5");
+  const [agentName, setAgentName] = useState("");
+  const [agentRncOrCedula, setAgentRncOrCedula] = useState("");
   const [notes, setNotes] = useState("");
 
   useEffect(() => {

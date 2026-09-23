@@ -61,13 +61,7 @@ export function DocumentList({ documents = [] }: { documents?: DocumentRecord[] 
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
 
-  // Mock data if none provided
-  const data = documents.length > 0 ? documents : [
-    { id: '1', name: 'Contrato de Servicios - Final.docx', version: 'v3', size: 1024 * 500, status: 'Firmado' as DocumentStatus, date: new Date(2026, 8, 15), type: 'Legal' },
-    { id: '2', name: 'Plano Mensura_Lote4B.pdf', version: 'v1', size: 1024 * 1024 * 2.5, status: 'En revisión' as DocumentStatus, date: new Date(2026, 8, 20), type: 'Agrimensura' },
-    { id: '3', name: 'Copia Cédula Propietario.jpg', version: 'v1', size: 1024 * 250, status: 'Aprobado' as DocumentStatus, date: new Date(2026, 8, 10), type: 'Identificación' },
-    { id: '4', name: 'Borrador Poder Especial.docx', version: 'v2', size: 1024 * 120, status: 'Borrador' as DocumentStatus, date: new Date(2026, 8, 22), type: 'Legal' },
-  ];
+  const data = documents;
 
   const filteredData = data.filter(doc => 
     doc.name.toLowerCase().includes(searchTerm.toLowerCase()) || 

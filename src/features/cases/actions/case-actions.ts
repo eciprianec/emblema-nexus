@@ -40,9 +40,6 @@ export async function addExtraordinaryProcessAction(caseId: string, processDetai
 export async function listCasesAction(filters?: { area?: string, status?: string }) {
   return {
     success: true,
-    data: [
-      { id: "case_1", numero: "LEG-2024-0001", area: "LEGAL", titulo: "Divorcio Civil", estado: "EN_PROCESO", prioridad: "ALTA", responsable: "Lic. Rodríguez" },
-      { id: "case_2", numero: "AGR-2024-0042", area: "AGRIMENSURA", titulo: "Deslinde Parcela 15", estado: "PENDIENTE", prioridad: "MEDIA", responsable: "Ing. Vargas" }
-    ]
+    data: []
   };
 }

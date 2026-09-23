@@ -22,11 +22,7 @@ import {
 import { ArrowUpRight, DollarSign } from "lucide-react";
 import { toast } from "sonner";
 
-const AVAILABLE_CASES = [
-  { id: "case_1", number: "LEG-2024-0001", title: "Divorcio Civil y Partición de Bienes", clientId: "cl_1", clientName: "Juan Pérez" },
-  { id: "case_2", number: "AGR-2024-0042", title: "Deslinde y Subdivisión Parcela 15", clientId: "cl_3", clientName: "Constructora del Este S.A.S." },
-  { id: "case_3", number: "INM-2024-0018", title: "Regularización Título Turístico", clientId: "cl_4", clientName: "Inmobiliaria Caribe Real S.R.L." },
-];
+const AVAILABLE_CASES: Array<{ id: string; number: string; title: string; clientId: string; clientName: string }> = [];
 
 export function ExpenseCreateModal() {
   const {

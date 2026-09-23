@@ -40,8 +40,8 @@ export function CaseWizard() {
           <div>
             <label className="block text-sm font-medium text-slate-700">Cliente Principal</label>
             <select className="mt-1 block w-full rounded-md border-slate-300 shadow-sm p-2 border">
-              <option>Juan Pérez</option>
-              <option>Empresa S.R.L.</option>
+              <option value="">-- Seleccionar cliente registrado --</option>
+              <option value="general">Cliente General / Por Definir</option>
             </select>
           </div>
         </div>

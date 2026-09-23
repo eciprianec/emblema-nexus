@@ -191,7 +191,7 @@ export function PublicInquiryForm() {
                 </Label>
                 <Input
                   id="fullName"
-                  placeholder="Ej: Lic. Juan Pérez / Constructora Dominicana SRL"
+                  placeholder="Ej: Lic. Carlos Gómez / Empresa Dominicana SRL"
                   value={formData.fullName}
                   onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                   required

@@ -38,15 +38,8 @@ export function FieldSessionCreateModal() {
   const [sessionCode, setSessionCode] = useState(`JC-2026-00${Math.floor(50 + Math.random() * 40)}`);
   const [sessionDate, setSessionDate] = useState(new Date().toISOString().split("T")[0]);
   const [weather, setWeather] = useState("Despejado, vientos suaves");
-  const [selectedPersonnelIds, setSelectedPersonnelIds] = useState<string[]>([
-    brigadePersonnel[0]?.id || "",
-    brigadePersonnel[2]?.id || "",
-    brigadePersonnel[3]?.id || "",
-  ]);
-  const [selectedEquipmentIds, setSelectedEquipmentIds] = useState<string[]>([
-    equipmentList[0]?.id || "",
-    equipmentList[1]?.id || "",
-  ]);
+  const [selectedPersonnelIds, setSelectedPersonnelIds] = useState<string[]>([]);
+  const [selectedEquipmentIds, setSelectedEquipmentIds] = useState<string[]>([]);
   const [actNumber, setActNumber] = useState(`AL-2026-01${Math.floor(20 + Math.random() * 70)}`);
   const [witnessName, setWitnessName] = useState("");
   const [witnessIdCard, setWitnessIdCard] = useState("");

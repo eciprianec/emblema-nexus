@@ -34,9 +34,7 @@ export function CasePropertyTab({ caseId }: CasePropertyTabProps) {
   } = useRealEstateStore();
 
   // Buscar inmuebles vinculados a este expediente
-  const caseProperties = properties.filter(
-    (p) => p.caseId === caseId || (!p.caseId && caseId === "LEG-2024-0001" && (p.id === "prop-1" || p.id === "prop-4"))
-  );
+  const caseProperties = properties.filter((p) => p.caseId === caseId);
 
   const activeProperty = caseProperties[0];
   const linkedContracts = contracts.filter(

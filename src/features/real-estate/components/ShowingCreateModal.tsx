@@ -36,7 +36,7 @@ export function ShowingCreateModal() {
   const [prospectName, setProspectName] = useState("");
   const [prospectPhone, setProspectPhone] = useState("");
   const [prospectEmail, setProspectEmail] = useState("");
-  const [assignedAgent, setAssignedAgent] = useState("Lic. Claudia Reynoso");
+  const [assignedAgent, setAssignedAgent] = useState("");
 
   useEffect(() => {
     if (selectedProperty) {

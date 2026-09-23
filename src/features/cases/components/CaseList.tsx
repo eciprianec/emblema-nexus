@@ -47,26 +47,35 @@ export function CaseList() {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-slate-200 text-sm">
-          {cases.map(c => (
-            <tr key={c.id}>
-              <td className="px-6 py-4">
-                <div className="font-medium text-slate-900">{c.numero}</div>
-                <div className="text-slate-500 text-xs">{c.titulo}</div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                {getAreaBadge(c.area)}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                {getStatusBadge(c.estado)}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-slate-500">
-                {c.responsable}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <Link href={`/expedientes/${c.id}`} className="text-slate-600 hover:text-slate-900">Ver Ficha</Link>
+          {cases.length === 0 ? (
+            <tr>
+              <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
+                <p className="text-base font-medium text-slate-700">No hay expedientes registrados</p>
+                <p className="text-sm mt-1">Haga clic en "+ Nuevo Expediente" para crear el primero.</p>
               </td>
             </tr>
-          ))}
+          ) : (
+            cases.map(c => (
+              <tr key={c.id}>
+                <td className="px-6 py-4">
+                  <div className="font-medium text-slate-900">{c.numero}</div>
+                  <div className="text-slate-500 text-xs">{c.titulo}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {getAreaBadge(c.area)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {getStatusBadge(c.estado)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-slate-500">
+                  {c.responsable}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <Link href={`/expedientes/${c.id}`} className="text-slate-600 hover:text-slate-900">Ver Ficha</Link>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

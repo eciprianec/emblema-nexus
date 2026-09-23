@@ -24,22 +24,9 @@ import { formatMoney } from "@/lib/utils";
 import { Plus, Trash2, FileCheck } from "lucide-react";
 import { toast } from "sonner";
 
-const AVAILABLE_CLIENTS = [
-  { id: "cl_1", name: "Juan Pérez", rncCedula: "001-0948271-3" },
-  { id: "cl_2", name: "Empresa S.R.L.", rncCedula: "1-31-98765-4" },
-  { id: "cl_3", name: "Constructora del Este S.A.S.", rncCedula: "1-01-88421-2" },
-  { id: "cl_4", name: "Inmobiliaria Caribe Real S.R.L.", rncCedula: "1-30-55612-9" },
-  { id: "cl_5", name: "Desarrollos Punta Cana S.R.L.", rncCedula: "1-32-11094-1" },
-  { id: "cl_6", name: "María Santos", rncCedula: "402-2384751-8" },
-  { id: "cl_7", name: "Grupo Hotelero Bahía S.A.", rncCedula: "1-30-99882-3" },
-  { id: "cl_8", name: "Inversiones del Cibao S.R.L.", rncCedula: "1-31-00293-8" },
-];
+const AVAILABLE_CLIENTS: Array<{ id: string; name: string; rncCedula: string }> = [];
 
-const AVAILABLE_CASES = [
-  { id: "case_1", number: "LEG-2024-0001", title: "Divorcio Civil y Partición de Bienes" },
-  { id: "case_2", number: "AGR-2024-0042", title: "Deslinde y Subdivisión Parcela 15" },
-  { id: "case_3", number: "INM-2024-0018", title: "Regularización Título Turístico" },
-];
+const AVAILABLE_CASES: Array<{ id: string; number: string; title: string }> = [];
 
 export function QuoteCreateModal() {
   const {
@@ -87,7 +74,7 @@ export function QuoteCreateModal() {
 
       setIssueDate(fmt(today));
       setValidUntil(fmt(in30Days));
-      setClientId(defaultClientIdForModal || AVAILABLE_CLIENTS[0].id);
+      setClientId(defaultClientIdForModal || (AVAILABLE_CLIENTS[0]?.id ?? ""));
       setCaseId(defaultCaseIdForModal || "");
       setCurrency("DOP");
       setNotes(

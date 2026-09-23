@@ -18,7 +18,7 @@ import { PortalDashboard } from '@/features/client-portal/components/PortalDashb
 import { Button } from '@/components/ui/button';
 
 export default function PortalPage() {
-  const { isAuthenticated, loginDemo } = useClientPortalStore();
+  const { isAuthenticated } = useClientPortalStore();
 
   if (isAuthenticated) {
     return <PortalDashboard />;
@@ -63,14 +63,6 @@ export default function PortalPage() {
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
-            <Button
-              variant="outline"
-              onClick={() => loginDemo('CLI-001')}
-              className="w-full text-xs font-medium border-slate-300 text-slate-700 hover:bg-slate-100 h-10"
-            >
-              <Sparkles className="w-3.5 h-3.5 mr-1.5 text-amber-600" />
-              Explorar Modo Demostración (Ing. Morales)
-            </Button>
           </div>
         </div>
 

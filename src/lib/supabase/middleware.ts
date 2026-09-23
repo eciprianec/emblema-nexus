@@ -35,10 +35,16 @@ export async function updateSession(request: NextRequest) {
   );
 
   // IMPORTANTE: No escribir lógica entre createServerClient y getUser.
-  // Un simple error podría hacer que el usuario se desloguee inesperadamente.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const res = await supabase.auth.getUser();
+    user = res.data.user;
+  } catch {
+    user = null;
+  }
+
+  const hasAdminSession = request.cookies.get("nexus_admin_session")?.value === "true";
+  const isAuthenticated = Boolean(user || hasAdminSession);
 
   // Rutas del portal de clientes y consultas públicas (tienen su propia autenticación/acceso)
   if (request.nextUrl.pathname.startsWith("/portal")) {
@@ -56,16 +62,16 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith(path)
   );
 
-  // Si no hay usuario y la ruta no es pública, redirigir al login
-  if (!user && !isPublicPath) {
+  // Si no hay usuario autenticado y la ruta no es pública, redirigir al login
+  if (!isAuthenticated && !isPublicPath) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("redirect", request.nextUrl.pathname);
     return NextResponse.redirect(url);
   }
 
-  // Si hay usuario y está en una ruta pública, redirigir al dashboard
-  if (user && isPublicPath) {
+  // Si está autenticado y está en una ruta pública, redirigir al dashboard
+  if (isAuthenticated && isPublicPath) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
