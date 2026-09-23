@@ -2399,6 +2399,435 @@ export type Database = {
         
         Relationships: GenericRelationship[];
       };
+      properties: {
+        Row: {
+          id: string;
+          company_id: string;
+          parcel_id: string | null;
+          case_id: string | null;
+          owner_client_id: string | null;
+          code: string;
+          title: string;
+          description: string | null;
+          property_type:
+            | "apartamento"
+            | "casa"
+            | "villa"
+            | "solar_terreno"
+            | "local_comercial"
+            | "nave_industrial"
+            | "oficina"
+            | "edificio"
+            | "finca";
+          listing_type:
+            | "venta"
+            | "alquiler"
+            | "alquiler_amueblado"
+            | "venta_o_alquiler";
+          status:
+            | "disponible"
+            | "reservada"
+            | "bajo_contrato"
+            | "vendida"
+            | "alquilada"
+            | "inactiva";
+          currency: "USD" | "DOP";
+          sale_price: number | null;
+          rental_price: number | null;
+          maintenance_fee: number | null;
+          bedrooms: number | null;
+          bathrooms: number | null;
+          half_bathrooms: number | null;
+          parking_spots: number | null;
+          construction_area_m2: number | null;
+          land_area_m2: number | null;
+          land_area_tareas: number | null;
+          year_built: number | null;
+          levels: number | null;
+          furnished:
+            | "no_amueblado"
+            | "semi_amueblado"
+            | "completamente_amueblado";
+          amenities: Json;
+          address_province: string;
+          address_municipality: string;
+          address_sector: string;
+          address_street: string | null;
+          latitude: number | null;
+          longitude: number | null;
+          images: Json;
+          virtual_tour_url: string | null;
+          title_deed_number: string | null;
+          is_exclusive: boolean;
+          commission_percentage: number;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          parcel_id?: string | null;
+          case_id?: string | null;
+          owner_client_id?: string | null;
+          code: string;
+          title: string;
+          description?: string | null;
+          property_type:
+            | "apartamento"
+            | "casa"
+            | "villa"
+            | "solar_terreno"
+            | "local_comercial"
+            | "nave_industrial"
+            | "oficina"
+            | "edificio"
+            | "finca";
+          listing_type:
+            | "venta"
+            | "alquiler"
+            | "alquiler_amueblado"
+            | "venta_o_alquiler";
+          status?:
+            | "disponible"
+            | "reservada"
+            | "bajo_contrato"
+            | "vendida"
+            | "alquilada"
+            | "inactiva";
+          currency?: "USD" | "DOP";
+          sale_price?: number | null;
+          rental_price?: number | null;
+          maintenance_fee?: number | null;
+          bedrooms?: number | null;
+          bathrooms?: number | null;
+          half_bathrooms?: number | null;
+          parking_spots?: number | null;
+          construction_area_m2?: number | null;
+          land_area_m2?: number | null;
+          land_area_tareas?: number | null;
+          year_built?: number | null;
+          levels?: number | null;
+          furnished?:
+            | "no_amueblado"
+            | "semi_amueblado"
+            | "completamente_amueblado";
+          amenities?: Json;
+          address_province?: string;
+          address_municipality?: string;
+          address_sector?: string;
+          address_street?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          images?: Json;
+          virtual_tour_url?: string | null;
+          title_deed_number?: string | null;
+          is_exclusive?: boolean;
+          commission_percentage?: number;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          parcel_id?: string | null;
+          case_id?: string | null;
+          owner_client_id?: string | null;
+          code?: string;
+          title?: string;
+          description?: string | null;
+          property_type?:
+            | "apartamento"
+            | "casa"
+            | "villa"
+            | "solar_terreno"
+            | "local_comercial"
+            | "nave_industrial"
+            | "oficina"
+            | "edificio"
+            | "finca";
+          listing_type?:
+            | "venta"
+            | "alquiler"
+            | "alquiler_amueblado"
+            | "venta_o_alquiler";
+          status?:
+            | "disponible"
+            | "reservada"
+            | "bajo_contrato"
+            | "vendida"
+            | "alquilada"
+            | "inactiva";
+          currency?: "USD" | "DOP";
+          sale_price?: number | null;
+          rental_price?: number | null;
+          maintenance_fee?: number | null;
+          bedrooms?: number | null;
+          bathrooms?: number | null;
+          half_bathrooms?: number | null;
+          parking_spots?: number | null;
+          construction_area_m2?: number | null;
+          land_area_m2?: number | null;
+          land_area_tareas?: number | null;
+          year_built?: number | null;
+          levels?: number | null;
+          furnished?:
+            | "no_amueblado"
+            | "semi_amueblado"
+            | "completamente_amueblado";
+          amenities?: Json;
+          address_province?: string;
+          address_municipality?: string;
+          address_sector?: string;
+          address_street?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          images?: Json;
+          virtual_tour_url?: string | null;
+          title_deed_number?: string | null;
+          is_exclusive?: boolean;
+          commission_percentage?: number;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
+      property_contracts: {
+        Row: {
+          id: string;
+          company_id: string;
+          property_id: string;
+          contract_number: string;
+          contract_type:
+            | "alquiler"
+            | "promesa_venta"
+            | "opcion_compra"
+            | "administracion";
+          status:
+            | "borrador"
+            | "vigente"
+            | "vencido"
+            | "resuelto"
+            | "cancelado";
+          lessor_client_id: string | null;
+          tenant_client_id: string | null;
+          case_id: string | null;
+          start_date: string;
+          end_date: string | null;
+          currency: "USD" | "DOP";
+          amount: number;
+          deposit_amount: number | null;
+          deposit_months: number;
+          payment_frequency: string;
+          late_fee_percentage: number;
+          grace_period_days: number;
+          terms_conditions: string | null;
+          document_url: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          property_id: string;
+          contract_number: string;
+          contract_type:
+            | "alquiler"
+            | "promesa_venta"
+            | "opcion_compra"
+            | "administracion";
+          status?:
+            | "borrador"
+            | "vigente"
+            | "vencido"
+            | "resuelto"
+            | "cancelado";
+          lessor_client_id?: string | null;
+          tenant_client_id?: string | null;
+          case_id?: string | null;
+          start_date: string;
+          end_date?: string | null;
+          currency?: "USD" | "DOP";
+          amount: number;
+          deposit_amount?: number | null;
+          deposit_months?: number;
+          payment_frequency?: string;
+          late_fee_percentage?: number;
+          grace_period_days?: number;
+          terms_conditions?: string | null;
+          document_url?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          property_id?: string;
+          contract_number?: string;
+          contract_type?:
+            | "alquiler"
+            | "promesa_venta"
+            | "opcion_compra"
+            | "administracion";
+          status?:
+            | "borrador"
+            | "vigente"
+            | "vencido"
+            | "resuelto"
+            | "cancelado";
+          lessor_client_id?: string | null;
+          tenant_client_id?: string | null;
+          case_id?: string | null;
+          start_date?: string;
+          end_date?: string | null;
+          currency?: "USD" | "DOP";
+          amount?: number;
+          deposit_amount?: number | null;
+          deposit_months?: number;
+          payment_frequency?: string;
+          late_fee_percentage?: number;
+          grace_period_days?: number;
+          terms_conditions?: string | null;
+          document_url?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
+      property_showings: {
+        Row: {
+          id: string;
+          company_id: string;
+          property_id: string;
+          client_id: string | null;
+          agent_id: string | null;
+          showing_date: string;
+          status: "programada" | "completada" | "cancelada" | "no_asistio";
+          interest_level: "alto" | "medio" | "bajo" | "descartado";
+          feedback: string | null;
+          offer_made: boolean;
+          offer_amount: number | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          property_id: string;
+          client_id?: string | null;
+          agent_id?: string | null;
+          showing_date: string;
+          status?: "programada" | "completada" | "cancelada" | "no_asistio";
+          interest_level?: "alto" | "medio" | "bajo" | "descartado";
+          feedback?: string | null;
+          offer_made?: boolean;
+          offer_amount?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          property_id?: string;
+          client_id?: string | null;
+          agent_id?: string | null;
+          showing_date?: string;
+          status?: "programada" | "completada" | "cancelada" | "no_asistio";
+          interest_level?: "alto" | "medio" | "bajo" | "descartado";
+          feedback?: string | null;
+          offer_made?: boolean;
+          offer_amount?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
+      broker_commissions: {
+        Row: {
+          id: string;
+          company_id: string;
+          property_id: string;
+          contract_id: string | null;
+          invoice_id: string | null;
+          beneficiary_type:
+            | "agente_interno"
+            | "corredor_externo"
+            | "empresa"
+            | "colaborador";
+          agent_id: string | null;
+          external_broker_name: string | null;
+          external_broker_rnc: string | null;
+          total_deal_amount: number;
+          commission_percentage: number;
+          commission_amount: number;
+          tax_withholding: number;
+          net_amount: number;
+          status: "pendiente" | "aprobada" | "pagada" | "cancelada";
+          paid_date: string | null;
+          payment_method: string | null;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          property_id: string;
+          contract_id?: string | null;
+          invoice_id?: string | null;
+          beneficiary_type:
+            | "agente_interno"
+            | "corredor_externo"
+            | "empresa"
+            | "colaborador";
+          agent_id?: string | null;
+          external_broker_name?: string | null;
+          external_broker_rnc?: string | null;
+          total_deal_amount: number;
+          commission_percentage: number;
+          commission_amount: number;
+          tax_withholding?: number;
+          net_amount: number;
+          status?: "pendiente" | "aprobada" | "pagada" | "cancelada";
+          paid_date?: string | null;
+          payment_method?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          property_id?: string;
+          contract_id?: string | null;
+          invoice_id?: string | null;
+          beneficiary_type?:
+            | "agente_interno"
+            | "corredor_externo"
+            | "empresa"
+            | "colaborador";
+          agent_id?: string | null;
+          external_broker_name?: string | null;
+          external_broker_rnc?: string | null;
+          total_deal_amount?: number;
+          commission_percentage?: number;
+          commission_amount?: number;
+          tax_withholding?: number;
+          net_amount?: number;
+          status?: "pendiente" | "aprobada" | "pagada" | "cancelada";
+          paid_date?: string | null;
+          payment_method?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
     };
     Views: {
       audit_logs_view: {
@@ -2476,3 +2905,31 @@ export type Database = {
     CompositeTypes: Record<string, never>;
   };
 }
+
+// Tipos de conveniencia para Inmobiliaria y Bienes Raíces (Fase 7)
+export type PropertyRow = Database["public"]["Tables"]["properties"]["Row"];
+export type PropertyInsert = Database["public"]["Tables"]["properties"]["Insert"];
+export type PropertyUpdate = Database["public"]["Tables"]["properties"]["Update"];
+
+export type PropertyContractRow = Database["public"]["Tables"]["property_contracts"]["Row"];
+export type PropertyContractInsert = Database["public"]["Tables"]["property_contracts"]["Insert"];
+export type PropertyContractUpdate = Database["public"]["Tables"]["property_contracts"]["Update"];
+
+export type PropertyShowingRow = Database["public"]["Tables"]["property_showings"]["Row"];
+export type PropertyShowingInsert = Database["public"]["Tables"]["property_showings"]["Insert"];
+export type PropertyShowingUpdate = Database["public"]["Tables"]["property_showings"]["Update"];
+
+export type BrokerCommissionRow = Database["public"]["Tables"]["broker_commissions"]["Row"];
+export type BrokerCommissionInsert = Database["public"]["Tables"]["broker_commissions"]["Insert"];
+export type BrokerCommissionUpdate = Database["public"]["Tables"]["broker_commissions"]["Update"];
+
+export type PropertyType = PropertyRow["property_type"];
+export type ListingType = PropertyRow["listing_type"];
+export type PropertyStatus = PropertyRow["status"];
+export type ContractType = PropertyContractRow["contract_type"];
+export type ContractStatus = PropertyContractRow["status"];
+export type ShowingStatus = PropertyShowingRow["status"];
+export type ShowingInterestLevel = PropertyShowingRow["interest_level"];
+export type BeneficiaryType = BrokerCommissionRow["beneficiary_type"];
+export type CommissionStatus = BrokerCommissionRow["status"];
+

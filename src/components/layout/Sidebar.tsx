@@ -17,6 +17,7 @@ import {
   LogOut,
   ShieldCheck,
   FileCode,
+  Building2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -30,6 +31,7 @@ const mainNavigation = [
   { name: 'Clientes', href: '/clientes', icon: Users },
   { name: 'Expedientes', href: '/expedientes', icon: Briefcase },
   { name: 'Agrimensura', href: '/agrimensura', icon: Compass },
+  { name: 'Inmobiliaria', href: '/inmobiliaria', icon: Building2 },
   { name: 'Documentos', href: '/documentos', icon: FolderOpen },
   { name: 'Finanzas', href: '/finanzas', icon: Receipt },
   { name: 'Facturación e-CF', href: '/finanzas/ecf', icon: ShieldCheck },

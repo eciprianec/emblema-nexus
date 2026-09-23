@@ -12,6 +12,8 @@ import { CaseFinanceTab } from "@/features/finance/components/CaseFinanceTab";
 import { FinanceModals } from "@/features/finance/components/FinanceModals";
 import { CaseSurveyTab } from "@/features/survey/components/CaseSurveyTab";
 import { SurveyModals } from "@/features/survey/components/SurveyModals";
+import { CasePropertyTab } from "@/features/real-estate/components/CasePropertyTab";
+import { RealEstateModals } from "@/features/real-estate/components/RealEstateModals";
 
 export function CaseDetail({ caseId }: { caseId: string }) {
   const [activeTab, setActiveTab] = useState("resumen");
@@ -22,6 +24,7 @@ export function CaseDetail({ caseId }: { caseId: string }) {
     { id: "tareas", label: "Tareas" },
     { id: "documentos", label: "Documentos" },
     { id: "agrimensura", label: "Agrimensura / Parcela" },
+    { id: "inmobiliaria", label: "Inmobiliaria" },
     { id: "finanzas", label: "Finanzas" },
     { id: "participantes", label: "Participantes" },
     { id: "bitacora", label: "Bitácora" },
@@ -107,6 +110,8 @@ export function CaseDetail({ caseId }: { caseId: string }) {
 
         {activeTab === "agrimensura" && <CaseSurveyTab caseId={caseId} />}
 
+        {activeTab === "inmobiliaria" && <CasePropertyTab caseId={caseId} />}
+
         {activeTab === "finanzas" && <CaseFinanceTab caseId={caseId} />}
 
         {activeTab === "bitacora" && (
@@ -125,6 +130,7 @@ export function CaseDetail({ caseId }: { caseId: string }) {
       </div>
       <FinanceModals />
       <SurveyModals />
+      <RealEstateModals />
     </div>
   );
 }
