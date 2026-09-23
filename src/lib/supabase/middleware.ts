@@ -40,6 +40,11 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Rutas del portal de clientes y consultas públicas (tienen su propia autenticación/acceso)
+  if (request.nextUrl.pathname.startsWith("/portal")) {
+    return supabaseResponse;
+  }
+
   // Rutas públicas que no requieren autenticación
   const publicPaths = ["/login", "/registro", "/recuperar"];
   const isPublicPath = publicPaths.some((path) =>

@@ -18,6 +18,8 @@ import {
   ShieldCheck,
   FileCode,
   Building2,
+  Globe,
+  ExternalLink,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -35,6 +37,7 @@ const mainNavigation = [
   { name: 'Documentos', href: '/documentos', icon: FolderOpen },
   { name: 'Finanzas', href: '/finanzas', icon: Receipt },
   { name: 'Facturación e-CF', href: '/finanzas/ecf', icon: ShieldCheck },
+  { name: 'Portal de Clientes', href: '/portal', icon: Globe },
   { name: 'Configuración', href: '/configuracion', icon: Settings },
 ];
 
@@ -133,6 +136,23 @@ export default function Sidebar({ user }: SidebarProps) {
                 )}
               />
               {!isCollapsed && <span>Configuración e-CF</span>}
+            </Link>
+
+            <Link
+              href="/portal/tracking"
+              target="_blank"
+              className={cn(
+                "group flex items-center rounded-md px-3 py-1.5 text-xs font-medium transition-colors text-slate-400 hover:bg-slate-900 hover:text-white"
+              )}
+              title={isCollapsed ? 'Tracking de Expedientes' : undefined}
+            >
+              <ExternalLink
+                className={cn(
+                  "h-4 w-4 flex-shrink-0 text-cyan-400",
+                  isCollapsed ? "mr-0" : "mr-3"
+                )}
+              />
+              {!isCollapsed && <span>Tracking de Casos (TRK)</span>}
             </Link>
           </div>
         </nav>

@@ -1,13 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { KeyRound, ShieldCheck } from "lucide-react";
 import { DocumentList } from "@/features/documents/components/DocumentList";
 import { DocumentUploader } from "@/features/documents/components/DocumentUploader";
 import { ClientFinanceTab } from "@/features/finance/components/ClientFinanceTab";
 import { FinanceModals } from "@/features/finance/components/FinanceModals";
+import { Button } from "@/components/ui/button";
+import { useClientPortalStore } from "@/features/client-portal/store/useClientPortalStore";
+import { ClientPortalAccessModal } from "@/features/client-portal/components/ClientPortalAccessModal";
 
 export function ClientDetail({ clientId }: { clientId: string }) {
   const [activeTab, setActiveTab] = useState("info");
+  const { openAccessModal } = useClientPortalStore();
 
   const tabs = [
     { id: "info", label: "Información" },
@@ -18,7 +23,23 @@ export function ClientDetail({ clientId }: { clientId: string }) {
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-slate-200">
+    <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+      <div className="border-b border-slate-200 px-6 py-3 flex items-center justify-between bg-slate-50">
+        <div className="flex items-center space-x-2">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Expediente del Cliente</span>
+          <span className="font-mono text-xs font-semibold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
+            {clientId}
+          </span>
+        </div>
+        <Button
+          size="sm"
+          onClick={() => openAccessModal({ id: clientId, name: `Cliente #${clientId}` })}
+          className="bg-slate-900 hover:bg-slate-850 text-white text-xs font-medium shadow-xs"
+        >
+          <KeyRound className="w-3.5 h-3.5 mr-1.5" />
+          Acceso al Portal
+        </Button>
+      </div>
       <div className="border-b border-slate-200">
         <nav className="flex -mb-px px-6 space-x-8">
           {tabs.map((tab) => (
@@ -85,6 +106,7 @@ export function ClientDetail({ clientId }: { clientId: string }) {
         )}
       </div>
       <FinanceModals />
+      <ClientPortalAccessModal />
     </div>
   );
 }

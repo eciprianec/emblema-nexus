@@ -2828,6 +2828,192 @@ export type Database = {
         };
         Relationships: GenericRelationship[];
       };
+      client_portal_access: {
+        Row: {
+          id: string;
+          company_id: string;
+          client_id: string;
+          email: string;
+          access_token: string;
+          is_active: boolean;
+          magic_code: string | null;
+          magic_code_expires_at: string | null;
+          last_login_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          client_id: string;
+          email: string;
+          access_token: string;
+          is_active?: boolean;
+          magic_code?: string | null;
+          magic_code_expires_at?: string | null;
+          last_login_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          client_id?: string;
+          email?: string;
+          access_token?: string;
+          is_active?: boolean;
+          magic_code?: string | null;
+          magic_code_expires_at?: string | null;
+          last_login_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
+      case_tracking_tokens: {
+        Row: {
+          id: string;
+          company_id: string;
+          case_id: string;
+          tracking_code: string;
+          is_public: boolean;
+          allow_document_download: boolean;
+          views_count: number;
+          last_viewed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          case_id: string;
+          tracking_code: string;
+          is_public?: boolean;
+          allow_document_download?: boolean;
+          views_count?: number;
+          last_viewed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          case_id?: string;
+          tracking_code?: string;
+          is_public?: boolean;
+          allow_document_download?: boolean;
+          views_count?: number;
+          last_viewed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
+      client_inquiries: {
+        Row: {
+          id: string;
+          company_id: string;
+          full_name: string;
+          email: string;
+          phone: string | null;
+          rnc_cedula: string | null;
+          service_type:
+            | "legal_inmobiliario"
+            | "deslinde_mensura"
+            | "compraventa"
+            | "constitucion_compania"
+            | "otro";
+          message: string;
+          status: "nuevo" | "contactado" | "en_cotizacion" | "convertido" | "descartado";
+          client_id: string | null;
+          case_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          full_name: string;
+          email: string;
+          phone?: string | null;
+          rnc_cedula?: string | null;
+          service_type:
+            | "legal_inmobiliario"
+            | "deslinde_mensura"
+            | "compraventa"
+            | "constitucion_compania"
+            | "otro";
+          message: string;
+          status?: "nuevo" | "contactado" | "en_cotizacion" | "convertido" | "descartado";
+          client_id?: string | null;
+          case_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          full_name?: string;
+          email?: string;
+          phone?: string | null;
+          rnc_cedula?: string | null;
+          service_type?:
+            | "legal_inmobiliario"
+            | "deslinde_mensura"
+            | "compraventa"
+            | "constitucion_compania"
+            | "otro";
+          message?: string;
+          status?: "nuevo" | "contactado" | "en_cotizacion" | "convertido" | "descartado";
+          client_id?: string | null;
+          case_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
+      client_document_requests: {
+        Row: {
+          id: string;
+          company_id: string;
+          client_id: string;
+          case_id: string | null;
+          title: string;
+          description: string | null;
+          status: "pendiente" | "subido" | "revisado" | "rechazado";
+          uploaded_document_id: string | null;
+          due_date: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          client_id: string;
+          case_id?: string | null;
+          title: string;
+          description?: string | null;
+          status?: "pendiente" | "subido" | "revisado" | "rechazado";
+          uploaded_document_id?: string | null;
+          due_date?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          client_id?: string;
+          case_id?: string | null;
+          title?: string;
+          description?: string | null;
+          status?: "pendiente" | "subido" | "revisado" | "rechazado";
+          uploaded_document_id?: string | null;
+          due_date?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
     };
     Views: {
       audit_logs_view: {
@@ -2932,4 +3118,47 @@ export type ShowingStatus = PropertyShowingRow["status"];
 export type ShowingInterestLevel = PropertyShowingRow["interest_level"];
 export type BeneficiaryType = BrokerCommissionRow["beneficiary_type"];
 export type CommissionStatus = BrokerCommissionRow["status"];
+
+// Tipos de conveniencia para Portal de Clientes y Tracking (Fase 8)
+export type ClientPortalAccessRow = Database["public"]["Tables"]["client_portal_access"]["Row"];
+export type ClientPortalAccessInsert = Database["public"]["Tables"]["client_portal_access"]["Insert"];
+export type ClientPortalAccessUpdate = Database["public"]["Tables"]["client_portal_access"]["Update"];
+
+export type CaseTrackingTokenRow = Database["public"]["Tables"]["case_tracking_tokens"]["Row"];
+export type CaseTrackingTokenInsert = Database["public"]["Tables"]["case_tracking_tokens"]["Insert"];
+export type CaseTrackingTokenUpdate = Database["public"]["Tables"]["case_tracking_tokens"]["Update"];
+
+export type ClientInquiryRow = Database["public"]["Tables"]["client_inquiries"]["Row"];
+export type ClientInquiryInsert = Database["public"]["Tables"]["client_inquiries"]["Insert"];
+export type ClientInquiryUpdate = Database["public"]["Tables"]["client_inquiries"]["Update"];
+
+export type ClientDocumentRequestRow = Database["public"]["Tables"]["client_document_requests"]["Row"];
+export type ClientDocumentRequestInsert = Database["public"]["Tables"]["client_document_requests"]["Insert"];
+export type ClientDocumentRequestUpdate = Database["public"]["Tables"]["client_document_requests"]["Update"];
+
+export type InquiryServiceType = ClientInquiryRow["service_type"];
+export type InquiryStatus = ClientInquiryRow["status"];
+export type DocumentRequestStatus = ClientDocumentRequestRow["status"];
+
+// Tipos de conveniencia para Expedientes, Clientes y Facturación
+export type CaseRow = Database["public"]["Tables"]["cases"]["Row"];
+export type CaseInsert = Database["public"]["Tables"]["cases"]["Insert"];
+export type CaseUpdate = Partial<CaseInsert>;
+
+export type CaseStageInstanceRow = Database["public"]["Tables"]["case_stage_instances"]["Row"];
+export type CaseStageInstanceInsert = Database["public"]["Tables"]["case_stage_instances"]["Insert"];
+export type CaseStageInstanceUpdate = Partial<CaseStageInstanceInsert>;
+
+export type ClientRow = Database["public"]["Tables"]["clients"]["Row"];
+export type ClientInsert = Database["public"]["Tables"]["clients"]["Insert"];
+export type ClientUpdate = Partial<ClientInsert>;
+
+export type InvoiceRow = Database["public"]["Tables"]["invoices"]["Row"];
+export type InvoiceInsert = Database["public"]["Tables"]["invoices"]["Insert"];
+export type InvoiceUpdate = Database["public"]["Tables"]["invoices"]["Update"];
+
+export type PaymentRow = Database["public"]["Tables"]["payments"]["Row"];
+export type PaymentInsert = Database["public"]["Tables"]["payments"]["Insert"];
+export type PaymentUpdate = Database["public"]["Tables"]["payments"]["Update"];
+
 
