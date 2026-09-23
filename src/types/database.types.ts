@@ -3014,6 +3014,87 @@ export type Database = {
         };
         Relationships: GenericRelationship[];
       };
+      report_definitions: {
+        Row: {
+          id: string;
+          company_id: string;
+          code: string;
+          title: string;
+          description: string | null;
+          category: "fiscal_dgii" | "financiero" | "operativo" | "agrimensura" | "inmobiliario";
+          default_params: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          code: string;
+          title: string;
+          description?: string | null;
+          category: "fiscal_dgii" | "financiero" | "operativo" | "agrimensura" | "inmobiliario";
+          default_params?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          code?: string;
+          title?: string;
+          description?: string | null;
+          category?: "fiscal_dgii" | "financiero" | "operativo" | "agrimensura" | "inmobiliario";
+          default_params?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
+      generated_reports: {
+        Row: {
+          id: string;
+          company_id: string;
+          report_code: string;
+          title: string;
+          period_start: string | null;
+          period_end: string | null;
+          format: "csv" | "txt" | "excel" | "json" | "pdf";
+          status: "generando" | "completado" | "fallido";
+          data_payload: Json | null;
+          file_url: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          report_code: string;
+          title: string;
+          period_start?: string | null;
+          period_end?: string | null;
+          format: "csv" | "txt" | "excel" | "json" | "pdf";
+          status?: "generando" | "completado" | "fallido";
+          data_payload?: Json | null;
+          file_url?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          report_code?: string;
+          title?: string;
+          period_start?: string | null;
+          period_end?: string | null;
+          format?: "csv" | "txt" | "excel" | "json" | "pdf";
+          status?: "generando" | "completado" | "fallido";
+          data_payload?: Json | null;
+          file_url?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: GenericRelationship[];
+      };
     };
     Views: {
       audit_logs_view: {
@@ -3031,6 +3112,75 @@ export type Database = {
           ip_address: string | null;
           user_agent: string | null;
           created_at: string;
+        };
+        Relationships: GenericRelationship[];
+      };
+      view_financial_kpis: {
+        Row: {
+          company_id: string;
+          company_name: string;
+          company_rnc: string | null;
+          total_invoiced: number;
+          total_ecf_invoiced: number;
+          total_collected: number;
+          total_itbis: number;
+          total_outstanding: number;
+          total_expenses: number;
+          total_expenses_itbis: number;
+          net_profit: number;
+          operational_margin_percentage: number;
+        };
+        Relationships: GenericRelationship[];
+      };
+      view_case_profitability: {
+        Row: {
+          case_id: string;
+          company_id: string;
+          case_number: string;
+          case_title: string;
+          case_status: string;
+          priority: string | null;
+          client_id: string | null;
+          client_name: string | null;
+          client_business_name: string | null;
+          client_rnc: string | null;
+          client_cedula: string | null;
+          responsible_id: string | null;
+          responsible_name: string | null;
+          area_name: string | null;
+          area_code: string | null;
+          total_billed: number;
+          fees_billed: number;
+          other_billed: number;
+          total_expenses: number;
+          judicial_expenses: number;
+          cadastral_expenses: number;
+          notary_expenses: number;
+          expert_expenses: number;
+          travel_expenses: number;
+          other_expenses: number;
+          net_profit: number;
+          margin_percentage: number;
+        };
+        Relationships: GenericRelationship[];
+      };
+      view_operational_productivity: {
+        Row: {
+          company_id: string;
+          user_id: string;
+          user_name: string;
+          user_phone: string | null;
+          user_type: string | null;
+          total_cases: number;
+          completed_cases: number;
+          active_cases: number;
+          total_tasks: number;
+          completed_tasks: number;
+          tasks_on_time: number;
+          tasks_late: number;
+          tasks_overdue_pending: number;
+          total_overdue: number;
+          on_time_rate: number;
         };
         Relationships: GenericRelationship[];
       };
@@ -3160,5 +3310,23 @@ export type InvoiceUpdate = Database["public"]["Tables"]["invoices"]["Update"];
 export type PaymentRow = Database["public"]["Tables"]["payments"]["Row"];
 export type PaymentInsert = Database["public"]["Tables"]["payments"]["Insert"];
 export type PaymentUpdate = Database["public"]["Tables"]["payments"]["Update"];
+
+// Tipos de conveniencia para Reportes Avanzados, BI y Exportaciones (Fase 9)
+export type ReportDefinitionRow = Database["public"]["Tables"]["report_definitions"]["Row"];
+export type ReportDefinitionInsert = Database["public"]["Tables"]["report_definitions"]["Insert"];
+export type ReportDefinitionUpdate = Database["public"]["Tables"]["report_definitions"]["Update"];
+
+export type GeneratedReportRow = Database["public"]["Tables"]["generated_reports"]["Row"];
+export type GeneratedReportInsert = Database["public"]["Tables"]["generated_reports"]["Insert"];
+export type GeneratedReportUpdate = Database["public"]["Tables"]["generated_reports"]["Update"];
+
+export type FinancialKpisViewRow = Database["public"]["Views"]["view_financial_kpis"]["Row"];
+export type CaseProfitabilityViewRow = Database["public"]["Views"]["view_case_profitability"]["Row"];
+export type OperationalProductivityViewRow = Database["public"]["Views"]["view_operational_productivity"]["Row"];
+
+export type ReportCategory = ReportDefinitionRow["category"];
+export type ReportFormat = GeneratedReportRow["format"];
+export type ReportStatus = GeneratedReportRow["status"];
+
 
 

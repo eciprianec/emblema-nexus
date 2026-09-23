@@ -20,6 +20,7 @@ import {
   Building2,
   Globe,
   ExternalLink,
+  BarChart3,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -37,6 +38,7 @@ const mainNavigation = [
   { name: 'Documentos', href: '/documentos', icon: FolderOpen },
   { name: 'Finanzas', href: '/finanzas', icon: Receipt },
   { name: 'Facturación e-CF', href: '/finanzas/ecf', icon: ShieldCheck },
+  { name: 'Reportes y BI', href: '/reportes', icon: BarChart3 },
   { name: 'Portal de Clientes', href: '/portal', icon: Globe },
   { name: 'Configuración', href: '/configuracion', icon: Settings },
 ];
