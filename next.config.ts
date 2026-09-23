@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   reactStrictMode: true,
 
   // Paquetes que no deben ser bundleados por Next.js (nativos de Node)

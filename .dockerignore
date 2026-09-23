@@ -1,0 +1,53 @@
+# =============================================================================
+# EMBLEMA NEXUS — Exclusiones para el Contexto de Docker
+# =============================================================================
+
+# Dependencias locales y logs de compilación
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Artefactos generados de Next.js y empaquetado
+.next
+dist
+build
+out
+*.tsbuildinfo
+
+# Control de versiones y CI/CD
+.git
+.gitignore
+.github
+.gitlab
+
+# Variables de entorno sensibles (se inyectan en ejecución, NUNCA en la imagen)
+.env
+.env*.local
+.env.production
+.env.staging
+.env.local
+
+# Scripts y temporales de entornos Windows
+*.ps1
+*.bat
+*.cmd
+
+# Sistema operativo y editores
+.DS_Store
+Thumbs.db
+.idea
+.vscode
+*.swp
+*~
+
+# Directorios de pruebas locales y temporales de Supabase
+supabase/.temp
+supabase/tests
+
+# Documentación de desarrollo
+docs
+CLAUDE.md
+AGENTS.md
+README.md

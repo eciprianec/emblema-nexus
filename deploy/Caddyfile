@@ -1,0 +1,111 @@
+# =============================================================================
+# EMBLEMA NEXUS — Configuración de Proxy Inverso Caddy v2
+# Proveedor SSL: Let's Encrypt / ZeroSSL Automático
+# =============================================================================
+
+{
+    # Correo para registro de certificados Let's Encrypt
+    email {$ACME_EMAIL:admin@emblemanexus.com}
+    admin off
+    servers {
+        trusted_proxies static private_ranges
+    }
+}
+
+# -----------------------------------------------------------------------------
+# 1. Dominio Principal: Aplicación Web Emblema Nexus (Next.js 16 Standalone)
+# -----------------------------------------------------------------------------
+{$APP_DOMAIN:app.emblemanexus.com} {
+    # Compresión HTTP de alto rendimiento
+    encode zstd gzip
+
+    # Cabeceras de endurecimiento de seguridad
+    header {
+        # Prevenir ataques de clickjacking
+        X-Frame-Options "SAMEORIGIN"
+        # Prevenir ataques de tipo MIME sniffing
+        X-Content-Type-Options "nosniff"
+        # HSTS: Forzar HTTPS durante 2 años incluyendo subdominios y precarga
+        Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        # Política de Referrer para privacidad
+        Referrer-Policy "strict-origin-when-cross-origin"
+        # Restricción de APIs del navegador no requeridas
+        Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+        # Protección XSS heredada para navegadores antiguos
+        X-XSS-Protection "1; mode=block"
+        # Ocultar firmas de software del servidor
+        -Server
+        -X-Powered-By
+    }
+
+    # Proxy inverso al contenedor de la aplicación Next.js
+    reverse_proxy app:3000 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-Host {host}
+    }
+
+    # Registro de auditoría y accesos en formato JSON
+    log {
+        output file /var/log/caddy/app_access.log {
+            roll_size 50mb
+            roll_keep 10
+            roll_keep_for 30d
+        }
+        format json
+    }
+}
+
+# -----------------------------------------------------------------------------
+# 2. Dominio Documental: Servidor Nextcloud (WebDAV, CalDAV, CardDAV)
+# -----------------------------------------------------------------------------
+{$NEXTCLOUD_DOMAIN:cloud.emblemanexus.com} {
+    # Compresión
+    encode zstd gzip
+
+    # Cabeceras de seguridad optimizadas para Nextcloud
+    header {
+        Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        X-Robots-Tag "noindex, nofollow"
+        X-Download-Options "noopen"
+        X-Permitted-Cross-Domain-Policies "none"
+        Referrer-Policy "no-referrer"
+        -Server
+        -X-Powered-By
+    }
+
+    # Redirecciones oficiales para clientes WebDAV / CalDAV / CardDAV
+    redir /.well-known/carddav /remote.php/dav 301
+    redir /.well-known/caldav /remote.php/dav 301
+    redir /.well-known/webfinger /index.php/.well-known/webfinger 301
+    redir /.well-known/nodeinfo /index.php/.well-known/nodeinfo 301
+
+    # Límite de carga de archivos hasta 10 Gigabytes para expedientes y planos
+    request_body {
+        max_size 10GB
+    }
+
+    # Proxy inverso hacia el contenedor de Nextcloud Apache
+    reverse_proxy nextcloud:80 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-Host {host}
+        header_up X-Forwarded-Port {server_port}
+    }
+
+    # Registro de auditoría y accesos de Nextcloud
+    log {
+        output file /var/log/caddy/nextcloud_access.log {
+            roll_size 50mb
+            roll_keep 10
+            roll_keep_for 30d
+        }
+        format json
+    }
+}

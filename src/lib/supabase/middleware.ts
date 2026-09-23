@@ -45,6 +45,11 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
+  // Rutas de API y endpoints internos (ej. /api/health) manejan su propia respuesta
+  if (request.nextUrl.pathname.startsWith("/api")) {
+    return supabaseResponse;
+  }
+
   // Rutas públicas que no requieren autenticación
   const publicPaths = ["/login", "/registro", "/recuperar"];
   const isPublicPath = publicPaths.some((path) =>
