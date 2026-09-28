@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -24,33 +25,53 @@ import {
 } from "@/components/ui/card";
 import { toast } from "sonner";
 
-const companyFormSchema = z.object({
-  businessName: z.string().min(2, "La razón social es requerida"),
-  rnc: z.string().min(9, "RNC inválido"),
-  phone: z.string().min(10, "Teléfono inválido"),
-  email: z.string().email("Correo electrónico inválido"),
-  currency: z.string().min(3),
-  address: z.string().min(5),
-});
+export interface CompanyFormValues {
+  businessName: string;
+  rnc: string;
+  phone: string;
+  email: string;
+  currency: string;
+  address: string;
+}
 
-type CompanyFormValues = z.infer<typeof companyFormSchema>;
+const companyFormSchema: z.ZodType<CompanyFormValues> = z.object({
+  businessName: z.string().min(2, "La razón social es requerida"),
+  rnc: z.string().min(9, "RNC o Cédula debe tener al menos 9 dígitos"),
+  phone: z.string(),
+  email: z.string(),
+  currency: z.string(),
+  address: z.string(),
+});
 
 export default function EmpresaPage() {
   const form = useForm<CompanyFormValues>({
     resolver: zodResolver(companyFormSchema),
     defaultValues: {
-      businessName: "Emblema Nexus - Oficina Central",
-      rnc: "130862346",
-      phone: "809-555-0100",
-      email: "contacto@emblemanexus.com",
+      businessName: "",
+      rnc: "",
+      phone: "",
+      email: "",
       currency: "DOP",
-      address: "Av. Winston Churchill, Santo Domingo",
+      address: "",
     },
   });
 
+  // Cargar datos guardados si existen
+  React.useEffect(() => {
+    try {
+      const saved = localStorage.getItem("nexus_company_profile");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        form.reset(parsed);
+      }
+    } catch {}
+  }, [form]);
+
   function onSubmit(data: CompanyFormValues) {
-    console.log(data);
-    toast.success("Información de la empresa actualizada de forma exitosa.");
+    try {
+      localStorage.setItem("nexus_company_profile", JSON.stringify(data));
+    } catch {}
+    toast.success("Información de la empresa guardada de forma exitosa.");
   }
 
   return (

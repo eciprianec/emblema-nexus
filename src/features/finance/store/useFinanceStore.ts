@@ -105,11 +105,11 @@ interface FinanceState {
 }
 
 // Generadores auxiliares de números
-let invoiceSequence = 91;
-let quoteSequence = 35;
-let paymentSequence = 100;
-let expenseSequence = 10;
-let ncfSequence = 147;
+let invoiceSequence = 1;
+let quoteSequence = 1;
+let paymentSequence = 1;
+let expenseSequence = 1;
+let ncfSequence = 1;
 
 const initialInvoices: Invoice[] = [];
 const initialQuotes: Quote[] = [];

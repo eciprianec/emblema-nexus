@@ -26,7 +26,7 @@ interface EcfState {
   // Datos principales
   issuedEcfs: IssuedECF[];
   receivedEcfs: ReceivedECF[];
-  sequences: Record<ECFType, ECFSequence>;
+  sequences: Partial<Record<ECFType, ECFSequence>>;
   config: ECFConfig;
 
   // Estado de modales y vistas
@@ -64,81 +64,25 @@ interface EcfState {
   acknowledgeReceivedEcf: (id: string) => void;
   setEnvironment: (env: ECFEnvironment) => void;
   updateConfig: (partial: Partial<ECFConfig>) => void;
+  addSequence: (seq: ECFSequence) => void;
+  deleteSequence: (type: ECFType) => void;
   updateSequence: (type: ECFType, partial: Partial<ECFSequence>) => void;
+  removeCertificate: () => void;
   simulateDgiiStatusUpdate: (ecfId: string, newStatus: ECFStatus) => void;
 }
 
-const INITIAL_SEQUENCES: Record<ECFType, ECFSequence> = {
-  E31: {
-    type: 'E31',
-    name: 'Factura de Crédito Fiscal Electrónica',
-    prefix: 'E31',
-    startNumber: 1,
-    endNumber: 1000,
-    currentNumber: 14,
-    expirationDate: '2026-12-31',
-    isActive: true,
-  },
-  E32: {
-    type: 'E32',
-    name: 'Factura de Consumo Electrónica',
-    prefix: 'E32',
-    startNumber: 1,
-    endNumber: 5000,
-    currentNumber: 28,
-    expirationDate: '2026-12-31',
-    isActive: true,
-  },
-  E34: {
-    type: 'E34',
-    name: 'Nota de Crédito Electrónica',
-    prefix: 'E34',
-    startNumber: 1,
-    endNumber: 500,
-    currentNumber: 4,
-    expirationDate: '2026-12-31',
-    isActive: true,
-  },
-  E44: {
-    type: 'E44',
-    name: 'Comprobante Regímenes Especiales Electrónico',
-    prefix: 'E44',
-    startNumber: 1,
-    endNumber: 250,
-    currentNumber: 3,
-    expirationDate: '2026-12-31',
-    isActive: true,
-  },
-  E45: {
-    type: 'E45',
-    name: 'Comprobante Gubernamental Electrónico',
-    prefix: 'E45',
-    startNumber: 1,
-    endNumber: 300,
-    currentNumber: 2,
-    expirationDate: '2026-12-31',
-    isActive: true,
-  },
-};
+const INITIAL_SEQUENCES: Partial<Record<ECFType, ECFSequence>> = {};
 
 const INITIAL_CONFIG: ECFConfig = {
-  rnc: '131987654',
-  razonSocial: 'EMBLEMA NEXUS S.R.L.',
-  nombreComercial: 'Emblema Nexus - Asesoría Legal, Agrimensura & Bienes Raíces',
-  actividadEconomica: '6910 - Actividades jurídicas, asesoría legal y servicios de agrimensura catastral',
-  direccionFiscal: 'Av. Winston Churchill No. 1099, Torre Acrópolis, Piso 14, Piantini, Santo Domingo, D.N.',
-  telefono: '(809) 555-0100',
-  emailNotificaciones: 'tributacion@emblemanexus.com.do',
-  ambiente: 'PROD',
-  certificado: {
-    nombreArchivo: 'emblema_nexus_firmadigital_2026.p12',
-    emisorCertificado: 'Avansi S.R.L. (Entidad de Certificación Acreditada por INDOTEL)',
-    validoHasta: '2027-05-18',
-    diasRestantes: 603,
-    sha256Fingerprint: 'B4:9C:21:8F:D3:5E:AA:77:01:92:44:8B:E3:67:10:99:A2:81:35:E4:70:9A:88:B1:30:EF:89:12:43:08:76:CD',
-    estado: 'activo',
-    tieneClave: true,
-  },
+  rnc: '',
+  razonSocial: '',
+  nombreComercial: '',
+  actividadEconomica: '',
+  direccionFiscal: '',
+  telefono: '',
+  emailNotificaciones: '',
+  ambiente: 'CERT',
+  certificado: null,
 };
 
 const INITIAL_ISSUED_ECFS: IssuedECF[] = [];
@@ -396,22 +340,52 @@ export const useEcfStore = create<EcfState>((set, get) => ({
       config: {
         ...state.config,
         ...partial,
-        certificado: {
-          ...state.config.certificado,
-          ...(partial.certificado || {}),
-        },
+        certificado:
+          partial.certificado !== undefined
+            ? partial.certificado
+            : state.config.certificado,
       },
     }));
   },
 
-  updateSequence: (type, partial) => {
+  addSequence: (seq) => {
     set((state) => ({
       sequences: {
         ...state.sequences,
-        [type]: {
-          ...state.sequences[type],
-          ...partial,
+        [seq.type]: seq,
+      },
+    }));
+  },
+
+  deleteSequence: (type) => {
+    set((state) => {
+      const nextSequences = { ...state.sequences };
+      delete nextSequences[type];
+      return { sequences: nextSequences };
+    });
+  },
+
+  updateSequence: (type, partial) => {
+    set((state) => {
+      const current = state.sequences[type];
+      if (!current) return state;
+      return {
+        sequences: {
+          ...state.sequences,
+          [type]: {
+            ...current,
+            ...partial,
+          },
         },
+      };
+    });
+  },
+
+  removeCertificate: () => {
+    set((state) => ({
+      config: {
+        ...state.config,
+        certificado: null,
       },
     }));
   },

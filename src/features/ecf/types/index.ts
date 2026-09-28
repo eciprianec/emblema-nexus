@@ -188,5 +188,5 @@ export interface ECFConfig {
     sha256Fingerprint: string;
     estado: 'activo' | 'por_vencer' | 'vencido';
     tieneClave: boolean;
-  };
+  } | null;
 }

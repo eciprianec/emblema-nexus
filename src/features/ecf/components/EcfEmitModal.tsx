@@ -55,9 +55,9 @@ export function EcfEmitModal() {
   const [items, setItems] = useState<FormItem[]>([
     {
       id: "1",
-      description: "Servicios Profesionales de Asesoría Legal y Técnica",
+      description: "",
       quantity: 1,
-      unitPrice: 50000,
+      unitPrice: 0,
       appliesTax: true,
     },
   ]);
@@ -90,9 +90,9 @@ export function EcfEmitModal() {
       setItems([
         {
           id: "1",
-          description: "Servicios Profesionales de Asesoría Legal y Técnica",
+          description: "",
           quantity: 1,
-          unitPrice: 50000,
+          unitPrice: 0,
           appliesTax: true,
         },
       ]);
@@ -244,6 +244,21 @@ export function EcfEmitModal() {
             <div className="p-3 bg-rose-50 border border-rose-200 rounded-md text-rose-800 flex items-start gap-2">
               <AlertCircle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
               <span className="text-xs">{errorMsg}</span>
+            </div>
+          )}
+
+          {!currentSeq && (
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-800 flex items-start gap-2">
+              <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+              <div className="text-xs">
+                <p className="font-semibold">Secuencia {ecfType} pendiente de configuración</p>
+                <p className="mt-0.5">
+                  No se ha registrado ningún rango autorizado por la DGII para comprobantes tipo {ecfType}. Configure la secuencia en{" "}
+                  <a href="/configuracion/ecf" className="underline font-semibold" target="_blank">
+                    Configuración &gt; DGII e-CF
+                  </a>.
+                </p>
+              </div>
             </div>
           )}
 
@@ -459,8 +474,8 @@ export function EcfEmitModal() {
               </Button>
               <Button
                 type="submit"
-                disabled={isSubmitting}
-                className="bg-slate-900 hover:bg-slate-800 text-white text-xs h-8 font-medium shadow-xs"
+                disabled={isSubmitting || !currentSeq}
+                className="bg-slate-900 hover:bg-slate-800 text-white text-xs h-8 font-medium shadow-xs disabled:opacity-50"
               >
                 {isSubmitting ? (
                   <>
