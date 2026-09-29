@@ -21,29 +21,42 @@ export function ClientForm() {
 
   const type = form.watch("type");
 
+  const handleTypeChange = (newType: "FISICA" | "JURIDICA") => {
+    form.setValue("type", newType);
+    form.clearErrors();
+  };
+
+  const onInvalid = (errors: any) => {
+    const errorKeys = Object.keys(errors);
+    if (errorKeys.length > 0) {
+      const firstError = errors[errorKeys[0]]?.message || "Por favor complete los campos obligatorios.";
+      toast.error(`Error de validación: ${firstError}`);
+    }
+  };
+
   async function onSubmit(data: ClientFormValues) {
     setIsSubmitting(true);
     try {
+      const isFisica = data.type === "FISICA";
       const created = addClient({
         type: data.type,
-        nombres: data.nombres,
-        apellidos: data.apellidos,
-        cedula: data.cedula,
-        pasaporte: data.pasaporte,
-        razonSocial: data.razonSocial,
-        nombreComercial: data.nombreComercial,
-        rnc: data.rnc,
-        representante: data.representante,
-        telefono: data.telefono,
-        email: data.email,
-        direccion: data.direccion,
+        nombres: isFisica ? data.nombres?.trim() : undefined,
+        apellidos: isFisica ? data.apellidos?.trim() : undefined,
+        cedula: isFisica ? data.cedula?.trim() : undefined,
+        pasaporte: isFisica ? data.pasaporte?.trim() : undefined,
+        razonSocial: !isFisica ? data.razonSocial?.trim() : undefined,
+        nombreComercial: !isFisica ? data.nombreComercial?.trim() : undefined,
+        rnc: !isFisica ? data.rnc?.trim() : undefined,
+        representante: !isFisica ? data.representante?.trim() : undefined,
+        telefono: data.telefono.trim(),
+        email: data.email.trim(),
+        direccion: data.direccion.trim(),
         status: "ACTIVO",
       });
 
-      const displayName =
-        data.type === "FISICA"
-          ? `${data.nombres} ${data.apellidos}`
-          : data.razonSocial || "Empresa";
+      const displayName = isFisica
+        ? `${created.nombres || ""} ${created.apellidos || ""}`.trim()
+        : created.razonSocial || "Empresa";
 
       // Aprovisionar carpetas en Nextcloud WebDAV
       try {
@@ -54,7 +67,7 @@ export function ClientForm() {
             type: "client",
             clientId: created.id,
             clientName: displayName,
-            docNumber: data.type === "FISICA" ? (data.cedula || data.pasaporte) : data.rnc,
+            docNumber: isFisica ? (data.cedula || data.pasaporte) : data.rnc,
           }),
         });
         const provData = await provRes.json();
@@ -79,7 +92,7 @@ export function ClientForm() {
 
   return (
     <form
-      onSubmit={form.handleSubmit(onSubmit)}
+      onSubmit={form.handleSubmit(onSubmit, onInvalid)}
       className="space-y-6 max-w-2xl bg-white p-6 rounded-lg shadow-sm border border-slate-200"
     >
       <div className="flex space-x-6 border-b border-slate-200 pb-4">
@@ -87,7 +100,8 @@ export function ClientForm() {
           <input
             type="radio"
             value="FISICA"
-            {...form.register("type")}
+            checked={type === "FISICA"}
+            onChange={() => handleTypeChange("FISICA")}
             className="text-slate-900 focus:ring-slate-900"
           />
           <span className="text-sm font-medium text-slate-700">Persona Física</span>
@@ -96,7 +110,8 @@ export function ClientForm() {
           <input
             type="radio"
             value="JURIDICA"
-            {...form.register("type")}
+            checked={type === "JURIDICA"}
+            onChange={() => handleTypeChange("JURIDICA")}
             className="text-slate-900 focus:ring-slate-900"
           />
           <span className="text-sm font-medium text-slate-700">Persona Jurídica (Empresa)</span>
