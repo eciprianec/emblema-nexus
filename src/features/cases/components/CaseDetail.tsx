@@ -2,8 +2,22 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Copy, Check, ExternalLink, ShieldCheck, Share2 } from "lucide-react";
+import {
+  Copy,
+  Check,
+  ExternalLink,
+  ShieldCheck,
+  FolderKanban,
+  User,
+  ArrowRight,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  Building,
+} from "lucide-react";
 import { toast } from "sonner";
+import { useCaseStore } from "../store/useCaseStore";
+import { CaseStatus } from "../types";
 import { WorkflowProgress } from "./WorkflowProgress";
 import { CaseTimeline } from "./CaseTimeline";
 import { ParticipantsList } from "./ParticipantsList";
@@ -17,21 +31,44 @@ import { CaseSurveyTab } from "@/features/survey/components/CaseSurveyTab";
 import { SurveyModals } from "@/features/survey/components/SurveyModals";
 import { CasePropertyTab } from "@/features/real-estate/components/CasePropertyTab";
 import { RealEstateModals } from "@/features/real-estate/components/RealEstateModals";
+import { Button } from "@/components/ui/button";
 
 export function CaseDetail({ caseId }: { caseId: string }) {
+  const { getCaseById, advanceStage, updateCaseStatus } = useCaseStore();
+  const caseData = getCaseById(caseId);
+
   const [activeTab, setActiveTab] = useState("resumen");
   const [copiedLink, setCopiedLink] = useState(false);
 
-  const trackingCode = `TRK-2026-${(caseId || "00000").slice(-5).toUpperCase()}`;
+  const trackingCode = caseData
+    ? `TRK-2026-${(caseData.numero || caseData.id).replace(/[^a-zA-Z0-9]/g, "").slice(-5).toUpperCase()}`
+    : `TRK-2026-${(caseId || "00000").slice(-5).toUpperCase()}`;
 
   const handleCopyLink = () => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
     const url = `${origin}/portal/tracking/${trackingCode}`;
     navigator.clipboard.writeText(url);
     setCopiedLink(true);
-    toast.success(`Enlace de seguimiento ${trackingCode} copiado.`);
+    toast.success(`Enlace de seguimiento ${trackingCode} copiado al portapapeles.`);
     setTimeout(() => setCopiedLink(false), 2000);
   };
+
+  if (!caseData) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-8 text-center mt-6">
+        <FolderKanban className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+        <h3 className="text-base font-semibold text-slate-900">Expediente no encontrado</h3>
+        <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+          No se encontró el registro con identificador <code>{caseId}</code> en la base de datos local.
+        </p>
+        <Link href="/expedientes" className="mt-4 inline-block">
+          <Button size="sm" className="bg-slate-900 hover:bg-slate-800 text-white text-xs">
+            ← Volver a Directorio de Expedientes
+          </Button>
+        </Link>
+      </div>
+    );
+  }
 
   const tabs = [
     { id: "resumen", label: "Resumen" },
@@ -43,7 +80,6 @@ export function CaseDetail({ caseId }: { caseId: string }) {
     { id: "finanzas", label: "Finanzas" },
     { id: "participantes", label: "Participantes" },
     { id: "bitacora", label: "Bitácora" },
-    { id: "versiones", label: "Versiones (Snapshots)" },
   ];
 
   return (
@@ -95,15 +131,17 @@ export function CaseDetail({ caseId }: { caseId: string }) {
           </Link>
         </div>
       </div>
+
+      {/* Navegación de Pestañas */}
       <div className="border-b border-slate-200">
         <nav className="flex -mb-px px-6 space-x-8 overflow-x-auto">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === tab.id
-                  ? "border-slate-900 text-slate-900"
+                  ? "border-slate-900 text-slate-900 font-bold"
                   : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
               }`}
             >
@@ -112,84 +150,159 @@ export function CaseDetail({ caseId }: { caseId: string }) {
           ))}
         </nav>
       </div>
+
       <div className="p-6">
+        {/* PESTAÑA: RESUMEN */}
         {activeTab === "resumen" && (
           <div className="space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div>
-                <span className="text-slate-500 block">Número</span>
-                <span className="font-medium text-slate-900">{caseId}</span>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                <span className="text-slate-500 block text-[11px]">Número Oficial</span>
+                <span className="font-mono font-bold text-slate-900 text-sm">{caseData.numero}</span>
               </div>
-              <div>
-                <span className="text-slate-500 block">Estado Actual</span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">En Proceso</span>
+              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                <span className="text-slate-500 block text-[11px]">Estado Actual</span>
+                <div className="flex items-center gap-2 mt-1">
+                  <select
+                    value={caseData.estado}
+                    onChange={(e) => {
+                      updateCaseStatus(caseData.id, e.target.value as CaseStatus);
+                      toast.success(`Estado actualizado a ${e.target.value}`);
+                    }}
+                    className="text-xs font-semibold rounded border border-slate-300 bg-white px-2 py-0.5 text-slate-800"
+                  >
+                    <option value="EN_PROCESO">En Proceso</option>
+                    <option value="PENDIENTE">Pendiente</option>
+                    <option value="COMPLETADO">Completado</option>
+                    <option value="CANCELADO">Cancelado</option>
+                  </select>
+                </div>
               </div>
-              <div>
-                <span className="text-slate-500 block">Responsable</span>
-                <span className="font-medium text-slate-900">Por Asignar</span>
+              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                <span className="text-slate-500 block text-[11px]">Cliente Titular</span>
+                <Link
+                  href={`/clientes/${caseData.clienteId}`}
+                  className="font-semibold text-slate-900 hover:text-blue-600 truncate block mt-0.5"
+                >
+                  {caseData.clientName} →
+                </Link>
               </div>
-              <div>
-                <span className="text-slate-500 block">Prioridad</span>
-                <span className="font-medium text-red-600">Alta</span>
+              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                <span className="text-slate-500 block text-[11px]">Responsable Asignado</span>
+                <div className="flex items-center gap-1 font-semibold text-slate-900 mt-0.5">
+                  <User className="h-3 w-3 text-slate-400" />
+                  <span>{caseData.responsable}</span>
+                </div>
               </div>
             </div>
-            
+
+            <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  {caseData.area} · {caseData.tipo}
+                </h4>
+                <span
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                    caseData.prioridad === "URGENTE"
+                      ? "bg-rose-100 text-rose-800 border-rose-200"
+                      : caseData.prioridad === "ALTA"
+                      ? "bg-amber-100 text-amber-800 border-amber-200"
+                      : "bg-slate-100 text-slate-800 border-slate-200"
+                  }`}
+                >
+                  Prioridad: {caseData.prioridad}
+                </span>
+              </div>
+              <h3 className="text-base font-bold text-slate-900">{caseData.titulo}</h3>
+              {caseData.descripcion && (
+                <p className="text-xs text-slate-600 mt-2 leading-relaxed">{caseData.descripcion}</p>
+              )}
+            </div>
+
             <div className="mt-8">
-              <h4 className="text-sm font-medium text-slate-900 mb-4">Progreso General</h4>
-              <WorkflowProgress currentStep={2} />
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-sm font-semibold text-slate-900">Progreso del Flujo de Trabajo</h4>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    advanceStage(caseData.id);
+                    toast.success("Flujo avanzado a la siguiente etapa.");
+                  }}
+                  className="bg-slate-900 hover:bg-slate-800 text-white text-xs h-7"
+                >
+                  <ArrowRight className="h-3 w-3 mr-1" />
+                  Avanzar Etapa ({caseData.stage}/5)
+                </Button>
+              </div>
+              <WorkflowProgress currentStep={caseData.stage} />
             </div>
-          </div>
-        )}
-        
-        {activeTab === "workflow" && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-slate-900">Flujo de Trabajo del Expediente</h3>
-              <button className="bg-slate-100 text-slate-700 px-3 py-1.5 rounded text-xs font-medium border border-slate-300 hover:bg-slate-200">
-                Avanzar Etapa
-              </button>
-            </div>
-            <WorkflowProgress currentStep={2} detailed />
           </div>
         )}
 
-        {activeTab === "tareas" && <TasksList caseId={caseId} />}
-        {activeTab === "participantes" && <ParticipantsList caseId={caseId} />}
-        
+        {/* PESTAÑA: WORKFLOW */}
+        {activeTab === "workflow" && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">Fases del Flujo Operativo</h3>
+                <p className="text-xs text-slate-500">Hitos normativos requeridos para la conclusión del caso.</p>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => {
+                  advanceStage(caseData.id);
+                  toast.success("Flujo avanzado a la siguiente etapa.");
+                }}
+                className="bg-slate-900 hover:bg-slate-800 text-white text-xs h-8"
+              >
+                <ArrowRight className="h-3.5 w-3.5 mr-1" />
+                Avanzar a Siguiente Etapa
+              </Button>
+            </div>
+            <WorkflowProgress currentStep={caseData.stage} detailed />
+          </div>
+        )}
+
+        {/* PESTAÑA: TAREAS */}
+        {activeTab === "tareas" && <TasksList caseId={caseData.id} />}
+
+        {/* PESTAÑA: PARTICIPANTES */}
+        {activeTab === "participantes" && <ParticipantsList caseId={caseData.id} />}
+
+        {/* PESTAÑA: DOCUMENTOS */}
         {activeTab === "documentos" && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium text-slate-900">Documentación del Expediente</h3>
+              <h3 className="text-sm font-semibold text-slate-900">Documentación del Expediente</h3>
               <TemplateGeneratorModal />
             </div>
-            <ChecklistManager caseId={caseId} />
+            <ChecklistManager caseId={caseData.id} />
             <div className="mt-8">
-              <h4 className="text-md font-medium text-slate-900 mb-4">Archivos Adjuntos</h4>
+              <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-4">
+                Archivos Adjuntos
+              </h4>
               <DocumentList />
             </div>
           </div>
         )}
 
-        {activeTab === "agrimensura" && <CaseSurveyTab caseId={caseId} />}
+        {/* PESTAÑA: AGRIMENSURA */}
+        {activeTab === "agrimensura" && <CaseSurveyTab caseId={caseData.id} />}
 
-        {activeTab === "inmobiliaria" && <CasePropertyTab caseId={caseId} />}
+        {/* PESTAÑA: INMOBILIARIA */}
+        {activeTab === "inmobiliaria" && <CasePropertyTab caseId={caseData.id} />}
 
-        {activeTab === "finanzas" && <CaseFinanceTab caseId={caseId} />}
+        {/* PESTAÑA: FINANZAS */}
+        {activeTab === "finanzas" && <CaseFinanceTab caseId={caseData.id} />}
 
+        {/* PESTAÑA: BITÁCORA */}
         {activeTab === "bitacora" && (
           <div>
-            <h3 className="text-lg font-medium text-slate-900 mb-4">Línea de Tiempo y Bitácora</h3>
-            <CaseTimeline caseId={caseId} />
-          </div>
-        )}
-
-        {activeTab === "versiones" && (
-          <div>
-            <h3 className="text-lg font-medium text-slate-900 mb-4">Snapshots / Versiones</h3>
-            <p className="text-sm text-slate-500">No hay snapshots registrados en este momento.</p>
+            <CaseTimeline caseId={caseData.id} />
           </div>
         )}
       </div>
+
       <FinanceModals />
       <SurveyModals />
       <RealEstateModals />

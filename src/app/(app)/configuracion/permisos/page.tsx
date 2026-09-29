@@ -15,8 +15,11 @@ const effectivePermissions = [
   { module: "Sistema", permission: "users:read", granted: true, origin: "Excepción de Usuario (Override)" },
 ];
 
+import { useUserStore } from "@/features/users/store/useUserStore";
+
 export default function PermisosPage() {
-  const [selectedUser, setSelectedUser] = useState("maria");
+  const { users } = useUserStore();
+  const [selectedUser, setSelectedUser] = useState(users[0]?.id || "admin");
 
   return (
     <div className="space-y-6">
@@ -39,8 +42,11 @@ export default function PermisosPage() {
                 <SelectValue placeholder="Seleccione un usuario" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="admin">Enmanuel Ciprian Arias (Admin)</SelectItem>
-                <SelectItem value="maria">María Pérez (Abogada)</SelectItem>
+                {users.map((u) => (
+                  <SelectItem key={u.id} value={u.id}>
+                    {u.nombres} {u.apellidos} ({u.rol})
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

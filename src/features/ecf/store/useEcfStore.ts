@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import {
   ECFType,
   ECFStatus,
@@ -103,7 +104,9 @@ function generateTrackId(): string {
   return `${hex(8)}-${hex(4)}-4${hex(3)}-8${hex(3)}-${hex(12)}`;
 }
 
-export const useEcfStore = create<EcfState>((set, get) => ({
+export const useEcfStore = create<EcfState>()(
+  persist(
+    (set, get) => ({
   issuedEcfs: INITIAL_ISSUED_ECFS,
   receivedEcfs: INITIAL_RECEIVED_ECFS,
   sequences: INITIAL_SEQUENCES,
@@ -410,4 +413,15 @@ export const useEcfStore = create<EcfState>((set, get) => ({
       }),
     }));
   },
-}));
+}),
+    {
+      name: 'nexus_ecf_store',
+      partialize: (state) => ({
+        issuedEcfs: state.issuedEcfs,
+        receivedEcfs: state.receivedEcfs,
+        sequences: state.sequences,
+        config: state.config,
+      }),
+    }
+  )
+);

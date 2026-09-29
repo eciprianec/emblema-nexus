@@ -20,8 +20,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCalendarStore } from "@/features/calendar/store/useCalendarStore";
 import { useTaskStore } from "@/features/tasks/store/useTaskStore";
-import { listClientsAction } from "@/features/clients/actions/client-actions";
-import { listCasesAction } from "@/features/cases/actions/case-actions";
+import { useClientStore } from "@/features/clients/store/useClientStore";
+import { useCaseStore } from "@/features/cases/store/useCaseStore";
 import { EventType } from "@/features/calendar/types";
 import { cn } from "@/lib/utils";
 
@@ -58,25 +58,12 @@ const EVENT_TYPE_BADGES: Record<
 export default function DashboardPage() {
   const { events } = useCalendarStore();
   const { tasks, moveTaskStatus } = useTaskStore();
+  const { clients } = useClientStore();
+  const { cases } = useCaseStore();
 
-  const [clientCount, setClientCount] = React.useState<number>(0);
-  const [caseCount, setCaseCount] = React.useState<number>(0);
-  const [isLoadingCounts, setIsLoadingCounts] = React.useState<boolean>(true);
-
-  React.useEffect(() => {
-    Promise.all([
-      listClientsAction()
-        .then((res) => (res.success && Array.isArray(res.data) ? res.data.length : 0))
-        .catch(() => 0),
-      listCasesAction()
-        .then((res) => (res.success && Array.isArray(res.data) ? res.data.length : 0))
-        .catch(() => 0),
-    ]).then(([clients, cases]) => {
-      setClientCount(clients);
-      setCaseCount(cases);
-      setIsLoadingCounts(false);
-    });
-  }, []);
+  const clientCount = clients.length;
+  const caseCount = cases.length;
+  const isLoadingCounts = false;
 
   const todayStr = React.useMemo(() => {
     const now = new Date();

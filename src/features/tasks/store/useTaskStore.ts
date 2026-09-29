@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { Task, TaskPriority, TaskStatus } from '../types';
 
 interface TaskState {
@@ -23,12 +24,14 @@ interface TaskState {
 
 const getInitialTasks = (): Task[] => [];
 
-export const useTaskStore = create<TaskState>((set) => ({
-  tasks: getInitialTasks(),
-  selectedTask: null,
-  isModalOpen: false,
-  searchQuery: '',
-  filterPriority: 'todas',
+export const useTaskStore = create<TaskState>()(
+  persist(
+    (set) => ({
+      tasks: getInitialTasks(),
+      selectedTask: null,
+      isModalOpen: false,
+      searchQuery: '',
+      filterPriority: 'todas',
 
   addTask: (taskData) => {
     const newTask: Task = {
@@ -133,4 +136,10 @@ export const useTaskStore = create<TaskState>((set) => ({
   setFilterPriority: (filterPriority) => {
     set({ filterPriority });
   },
-}));
+}),
+    {
+      name: 'nexus_tasks_store',
+      partialize: (state) => ({ tasks: state.tasks }),
+    }
+  )
+);

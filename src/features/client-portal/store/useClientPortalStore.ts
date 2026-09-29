@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import {
   ClientPortalUser,
   ClientCase,
@@ -66,7 +67,9 @@ const INITIAL_REQUIREMENTS: DocumentRequirement[] = [];
 const INITIAL_INQUIRIES: PublicInquiry[] = [];
 const INITIAL_CREDENTIALS: PortalAccessCredential[] = [];
 
-export const useClientPortalStore = create<ClientPortalState>((set, get) => ({
+export const useClientPortalStore = create<ClientPortalState>()(
+  persist(
+    (set, get) => ({
   isAuthenticated: false,
   currentUser: null,
   activeCaseId: null,
@@ -287,4 +290,16 @@ export const useClientPortalStore = create<ClientPortalState>((set, get) => ({
 
     return trackingNumber;
   },
-}));
+}),
+    {
+      name: 'nexus_clientportal_store',
+      partialize: (state) => ({
+        cases: state.cases,
+        invoices: state.invoices,
+        requirements: state.requirements,
+        inquiries: state.inquiries,
+        credentials: state.credentials,
+      }),
+    }
+  )
+);

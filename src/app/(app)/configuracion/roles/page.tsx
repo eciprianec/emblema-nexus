@@ -15,15 +15,56 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-const rolesData = [
-  { id: 1, name: "Administrador del Sistema", description: "Acceso total a todas las configuraciones y datos.", users: 2, level: "Alto" },
-  { id: 2, name: "Gerente de Área", description: "Acceso a reportes y expedientes de su área operativa.", users: 4, level: "Medio" },
-  { id: 3, name: "Profesional (Abogado)", description: "Acceso para editar expedientes asignados.", users: 12, level: "Medio" },
-  { id: 4, name: "Asistente", description: "Creación de expedientes y visualización básica.", users: 8, level: "Bajo" },
-];
+import { useUserStore } from "@/features/users/store/useUserStore";
 
 export default function RolesPage() {
   const [search, setSearch] = useState("");
+  const { users } = useUserStore();
+
+  const rolesData = [
+    {
+      id: 1,
+      name: "Administrador del Sistema",
+      description: "Acceso total a todas las configuraciones y datos.",
+      users: users.filter((u) => u.rol === "ADMINISTRADOR").length,
+      level: "Alto",
+    },
+    {
+      id: 2,
+      name: "Profesional (Abogado)",
+      description: "Acceso para editar expedientes asignados y redacción legal.",
+      users: users.filter((u) => u.rol === "ABOGADO").length,
+      level: "Medio",
+    },
+    {
+      id: 3,
+      name: "Profesional (Agrimensor)",
+      description: "Acceso para expedientes de mensura, catastro y estaciones de campo.",
+      users: users.filter((u) => u.rol === "AGRIMENSOR").length,
+      level: "Medio",
+    },
+    {
+      id: 4,
+      name: "Agente Inmobiliario",
+      description: "Gestión de propiedades, proyectos, contratos y visitas.",
+      users: users.filter((u) => u.rol === "AGENTE_INMOBILIARIO").length,
+      level: "Medio",
+    },
+    {
+      id: 5,
+      name: "Contador / Finanzas",
+      description: "Emisión de facturas electrónicas e-CF, cobros, pagos y reportes 606/607.",
+      users: users.filter((u) => u.rol === "CONTADOR").length,
+      level: "Medio",
+    },
+    {
+      id: 6,
+      name: "Asistente",
+      description: "Creación de expedientes, registro de clientes y visualización básica.",
+      users: users.filter((u) => u.rol === "ASISTENTE").length,
+      level: "Bajo",
+    },
+  ];
 
   const filteredRoles = rolesData.filter((r) => r.name.toLowerCase().includes(search.toLowerCase()));
 

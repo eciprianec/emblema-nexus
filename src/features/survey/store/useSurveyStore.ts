@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import {
   Parcel,
   CadastralFile,
@@ -71,7 +72,9 @@ const initialParcels: Parcel[] = [];
 const initialCadastralFiles: CadastralFile[] = [];
 const initialFieldSessions: FieldSession[] = [];
 
-export const useSurveyStore = create<SurveyState>((set, get) => ({
+export const useSurveyStore = create<SurveyState>()(
+  persist(
+    (set, get) => ({
   parcels: initialParcels,
   cadastralFiles: initialCadastralFiles,
   fieldSessions: initialFieldSessions,
@@ -293,4 +296,16 @@ export const useSurveyStore = create<SurveyState>((set, get) => ({
           : state.selectedFieldSession,
     }));
   },
-}));
+}),
+    {
+      name: 'nexus_survey_store',
+      partialize: (state) => ({
+        parcels: state.parcels,
+        cadastralFiles: state.cadastralFiles,
+        fieldSessions: state.fieldSessions,
+        equipmentList: state.equipmentList,
+        brigadePersonnel: state.brigadePersonnel,
+      }),
+    }
+  )
+);

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { CalendarEvent, EventType } from '../types';
 
 interface CalendarState {
@@ -17,11 +18,13 @@ interface CalendarState {
 
 const getInitialEvents = (): CalendarEvent[] => [];
 
-export const useCalendarStore = create<CalendarState>((set) => ({
-  events: getInitialEvents(),
-  selectedEvent: null,
-  isModalOpen: false,
-  filterType: 'todos',
+export const useCalendarStore = create<CalendarState>()(
+  persist(
+    (set) => ({
+      events: getInitialEvents(),
+      selectedEvent: null,
+      isModalOpen: false,
+      filterType: 'todos',
 
   addEvent: (eventData) => {
     const newEvent: CalendarEvent = {
@@ -96,4 +99,10 @@ export const useCalendarStore = create<CalendarState>((set) => ({
   setFilterType: (filterType) => {
     set({ filterType });
   },
-}));
+}),
+    {
+      name: 'nexus_calendar_store',
+      partialize: (state) => ({ events: state.events }),
+    }
+  )
+);

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import {
   Property,
   RealEstateContract,
@@ -76,7 +77,9 @@ const INITIAL_CONTRACTS: RealEstateContract[] = [];
 const INITIAL_SHOWINGS: RealEstateShowing[] = [];
 const INITIAL_COMMISSIONS: BrokerageCommission[] = [];
 
-export const useRealEstateStore = create<RealEstateState>((set, get) => ({
+export const useRealEstateStore = create<RealEstateState>()(
+  persist(
+    (set, get) => ({
   properties: INITIAL_PROPERTIES,
   contracts: INITIAL_CONTRACTS,
   showings: INITIAL_SHOWINGS,
@@ -330,4 +333,15 @@ export const useRealEstateStore = create<RealEstateState>((set, get) => ({
       selectedCommission: null,
     }));
   },
-}));
+}),
+    {
+      name: 'nexus_realestate_store',
+      partialize: (state) => ({
+        properties: state.properties,
+        contracts: state.contracts,
+        showings: state.showings,
+        commissions: state.commissions,
+      }),
+    }
+  )
+);

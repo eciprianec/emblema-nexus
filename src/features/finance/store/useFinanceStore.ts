@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import {
   Invoice,
   Quote,
@@ -118,7 +119,9 @@ const initialExpenses: Expense[] = [];
 const initialBankAccounts: BankAccount[] = [];
 const initialPettyCashMovements: PettyCashMovement[] = [];
 
-export const useFinanceStore = create<FinanceState>((set, get) => ({
+export const useFinanceStore = create<FinanceState>()(
+  persist(
+    (set, get) => ({
   invoices: initialInvoices,
   quotes: initialQuotes,
   payments: initialPayments,
@@ -565,4 +568,20 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
       balance,
     };
   },
-}));
+}),
+    {
+      name: 'nexus_finance_store',
+      partialize: (state) => ({
+        invoices: state.invoices,
+        quotes: state.quotes,
+        payments: state.payments,
+        expenses: state.expenses,
+        bankAccounts: state.bankAccounts,
+        pettyCashMovements: state.pettyCashMovements,
+        pettyCashBalance: state.pettyCashBalance,
+        pettyCashLimit: state.pettyCashLimit,
+        pettyCashCustodian: state.pettyCashCustodian,
+      }),
+    }
+  )
+);
