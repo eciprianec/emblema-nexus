@@ -1,68 +1,30 @@
-import React from 'react';
-import { Metadata } from 'next';
-import { Search, Filter, FolderKanban } from 'lucide-react';
-import { DocumentList } from '@/features/documents/components/DocumentList';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React from "react";
+import { Metadata } from "next";
+import { FolderKanban } from "lucide-react";
+import { NextcloudFileExplorer } from "@/features/documents/components/NextcloudFileExplorer";
 
 export const metadata: Metadata = {
-  title: 'Gestión Documental | Emblema Nexus',
-  description: 'Explorador general de documentos de la empresa',
+  title: "Gestión Documental & Bóveda Cloud | Emblema Nexus",
+  description: "Explorador general de documentos y bóveda Nextcloud WebDAV",
 };
 
 export default function DocumentosPage() {
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
+    <div className="flex-1 space-y-5 p-4 md:p-8 pt-6 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-            <FolderKanban className="h-8 w-8 text-slate-700" />
-            Explorador de Documentos
-          </h2>
-          <p className="text-slate-500">
-            Gestión centralizada de toda la documentación corporativa y de expedientes.
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-2.5">
+            <FolderKanban className="h-7 w-7 text-sky-700" />
+            Explorador Documental & Bóveda Cloud
+          </h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Gestión centralizada de expedientes, clientes y plantillas sincronizadas con Nextcloud WebDAV.
           </p>
         </div>
       </div>
 
-      <Tabs defaultValue="todos" className="space-y-4 mt-6">
-        <TabsList className="bg-slate-100/50 p-1">
-          <TabsTrigger value="todos">Todos los Documentos</TabsTrigger>
-          <TabsTrigger value="legal">Área Legal</TabsTrigger>
-          <TabsTrigger value="agrimensura">Agrimensura</TabsTrigger>
-          <TabsTrigger value="inmobiliaria">Inmobiliaria</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="todos" className="space-y-4">
-          <Card className="shadow-sm border-slate-200">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg text-slate-800">Directorio Global</CardTitle>
-              <CardDescription>
-                Búsqueda global a través de todas las áreas de la empresa.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <DocumentList />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="legal">
-          <Card className="shadow-sm border-slate-200">
-            <CardContent className="pt-6">
-              <DocumentList documents={[]} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="agrimensura">
-          <Card className="shadow-sm border-slate-200">
-            <CardContent className="pt-6">
-              <DocumentList documents={[]} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      {/* Explorador de Archivos Nextcloud */}
+      <NextcloudFileExplorer />
     </div>
   );
 }
