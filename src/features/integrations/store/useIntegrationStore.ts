@@ -19,16 +19,19 @@ interface IntegrationState {
 
 const STORAGE_KEY = 'nexus_integration_nextcloud';
 
+const DEFAULT_PRECONFIG: NextcloudConfig = {
+  isConfigured: true,
+  serverUrl: 'https://nextcloud.ciberemblema.com',
+  username: 'admin',
+  password: 'K1mK9nZmYeb9j9oMbZmv',
+  remotePath: '/remote.php/dav/files/admin/nexus_storage',
+  status: 'connected',
+  lastChecked: '2026-09-29T19:26:24.000Z',
+};
+
 const loadSavedConfig = (): NextcloudConfig => {
   if (typeof window === 'undefined') {
-    return {
-      isConfigured: false,
-      serverUrl: '',
-      username: '',
-      remotePath: '',
-      status: 'disconnected',
-      lastChecked: null,
-    };
+    return DEFAULT_PRECONFIG;
   }
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -36,19 +39,12 @@ const loadSavedConfig = (): NextcloudConfig => {
       const parsed = JSON.parse(raw);
       return {
         ...parsed,
-        isConfigured: Boolean(parsed.serverUrl && parsed.username),
-        status: parsed.serverUrl && parsed.username ? 'connected' : 'disconnected',
+        isConfigured: Boolean(parsed.isConfigured !== false && parsed.serverUrl && parsed.username),
+        status: parsed.status || (parsed.serverUrl && parsed.username ? 'connected' : 'disconnected'),
       };
     }
   } catch {}
-  return {
-    isConfigured: false,
-    serverUrl: '',
-    username: '',
-    remotePath: '',
-    status: 'disconnected',
-    lastChecked: null,
-  };
+  return DEFAULT_PRECONFIG;
 };
 
 export const useIntegrationStore = create<IntegrationState>((set) => ({
