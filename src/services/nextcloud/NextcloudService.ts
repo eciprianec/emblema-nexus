@@ -39,7 +39,7 @@ export interface INextcloudService {
   checkConnection(): Promise<boolean>;
 
   /** Crear carpeta para un cliente (§23) */
-  createClientFolder(clientName: string): Promise<string>;
+  createClientFolder(clientName: string, clientId?: string): Promise<string>;
 
   /** Crear carpeta para un expediente dentro del cliente (§23) */
   createCaseFolder(

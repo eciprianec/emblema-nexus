@@ -22,8 +22,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTaskStore } from "../store/useTaskStore";
+import { useCaseStore } from "@/features/cases/store/useCaseStore";
+import { useUserStore } from "@/features/users/store/useUserStore";
 import { Task, TaskPriority, TaskStatus, ChecklistItem } from "../types";
-import { Plus, Trash2, AlertCircle } from "lucide-react";
+import { Plus, Trash2, AlertCircle, Briefcase, UserCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const PRIORITY_LABELS: Record<TaskPriority, string> = {
@@ -40,8 +42,6 @@ const STATUS_LABELS: Record<TaskStatus, string> = {
   completada: "Completada",
 };
 
-const AVAILABLE_CASES: Array<{ id: string; number: string; title: string }> = [];
-
 interface TaskFormProps {
   task: Task | null;
   onClose: () => void;
@@ -52,6 +52,12 @@ interface TaskFormProps {
 
 function TaskForm({ task, onClose, onAdd, onUpdate, onDelete }: TaskFormProps) {
   const isEditing = Boolean(task && task.id);
+  const cases = useCaseStore((state) => state.cases);
+  const users = useUserStore((state) => state.users);
+
+  const defaultAssignee =
+    task?.assignedTo ||
+    (users.length > 0 ? `${users[0].nombres} ${users[0].apellidos}` : "Administrador");
 
   const [formData, setFormData] = React.useState<{
     title: string;
@@ -62,6 +68,7 @@ function TaskForm({ task, onClose, onAdd, onUpdate, onDelete }: TaskFormProps) {
     caseId?: string;
     caseNumber?: string;
     caseTitle?: string;
+    assignedTo: string;
     checklist: ChecklistItem[];
   }>({
     title: task?.title || "",
@@ -72,11 +79,32 @@ function TaskForm({ task, onClose, onAdd, onUpdate, onDelete }: TaskFormProps) {
     caseId: task?.caseId || "",
     caseNumber: task?.caseNumber || "",
     caseTitle: task?.caseTitle || "",
+    assignedTo: defaultAssignee,
     checklist: task?.checklist ? [...task.checklist] : [],
   });
 
   const [newItemText, setNewItemText] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
+
+  // Sync if task changes
+  React.useEffect(() => {
+    if (task) {
+      setFormData({
+        title: task.title || "",
+        description: task.description || "",
+        priority: task.priority || "normal",
+        status: task.status || "pendiente",
+        dueDate: task.dueDate || "",
+        caseId: task.caseId || "",
+        caseNumber: task.caseNumber || "",
+        caseTitle: task.caseTitle || "",
+        assignedTo:
+          task.assignedTo ||
+          (users.length > 0 ? `${users[0].nombres} ${users[0].apellidos}` : "Administrador"),
+        checklist: task.checklist ? [...task.checklist] : [],
+      });
+    }
+  }, [task, users]);
 
   const handleCaseChange = (caseId: string) => {
     if (caseId === "none") {
@@ -87,12 +115,12 @@ function TaskForm({ task, onClose, onAdd, onUpdate, onDelete }: TaskFormProps) {
         caseTitle: undefined,
       }));
     } else {
-      const selected = AVAILABLE_CASES.find((c) => c.id === caseId);
+      const selected = cases.find((c) => c.id === caseId);
       setFormData((prev) => ({
         ...prev,
         caseId,
-        caseNumber: selected?.number,
-        caseTitle: selected?.title,
+        caseNumber: selected?.numero,
+        caseTitle: selected?.titulo,
       }));
     }
   };
@@ -145,7 +173,18 @@ function TaskForm({ task, onClose, onAdd, onUpdate, onDelete }: TaskFormProps) {
     }
 
     if (isEditing && task?.id) {
-      onUpdate(task.id, formData);
+      onUpdate(task.id, {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        priority: formData.priority,
+        status: formData.status,
+        dueDate: formData.dueDate,
+        caseId: formData.caseId,
+        caseNumber: formData.caseNumber,
+        caseTitle: formData.caseTitle,
+        assignedTo: formData.assignedTo,
+        checklist: formData.checklist,
+      });
     } else {
       onAdd({
         title: formData.title.trim(),
@@ -156,6 +195,7 @@ function TaskForm({ task, onClose, onAdd, onUpdate, onDelete }: TaskFormProps) {
         caseId: formData.caseId,
         caseNumber: formData.caseNumber,
         caseTitle: formData.caseTitle,
+        assignedTo: formData.assignedTo,
         checklist: formData.checklist,
       });
     }
@@ -242,7 +282,7 @@ function TaskForm({ task, onClose, onAdd, onUpdate, onDelete }: TaskFormProps) {
         </div>
       </div>
 
-      {/* Fecha de vencimiento y Expediente asociado */}
+      {/* Fecha de vencimiento y Responsable Asignado */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label htmlFor="task-due" className="text-xs font-medium text-slate-700 dark:text-slate-300">
@@ -259,28 +299,60 @@ function TaskForm({ task, onClose, onAdd, onUpdate, onDelete }: TaskFormProps) {
         </div>
 
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-            Expediente Asociado (Opcional)
+          <Label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1">
+            <UserCheck className="w-3.5 h-3.5 text-slate-500" />
+            Responsable Asignado
           </Label>
           <Select
-            value={formData.caseId || "none"}
-            onValueChange={handleCaseChange}
+            value={formData.assignedTo}
+            onValueChange={(val) => setFormData({ ...formData, assignedTo: val })}
           >
             <SelectTrigger className="h-9 text-sm">
-              <SelectValue placeholder="Sin expediente" />
+              <SelectValue placeholder="Seleccione responsable" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none" className="text-sm text-slate-500">
-                Ninguno (Tarea General)
-              </SelectItem>
-              {AVAILABLE_CASES.map((c) => (
-                <SelectItem key={c.id} value={c.id} className="text-sm">
-                  {c.number} — {c.title}
+              {users.map((u) => {
+                const fullName = `${u.nombres} ${u.apellidos}`.trim();
+                return (
+                  <SelectItem key={u.id} value={fullName} className="text-sm">
+                    {fullName} ({u.rol})
+                  </SelectItem>
+                );
+              })}
+              {users.length === 0 && (
+                <SelectItem value="Administrador" className="text-sm">
+                  Administrador
                 </SelectItem>
-              ))}
+              )}
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      {/* Expediente Asociado */}
+      <div className="space-y-1.5">
+        <Label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1">
+          <Briefcase className="w-3.5 h-3.5 text-slate-500" />
+          Expediente Asociado (Opcional)
+        </Label>
+        <Select
+          value={formData.caseId || "none"}
+          onValueChange={handleCaseChange}
+        >
+          <SelectTrigger className="h-9 text-sm">
+            <SelectValue placeholder="Sin expediente" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none" className="text-sm text-slate-500">
+              Ninguno (Tarea General)
+            </SelectItem>
+            {cases.map((c) => (
+              <SelectItem key={c.id} value={c.id} className="text-sm">
+                <span className="font-mono font-semibold">{c.numero}</span> — {c.titulo} ({c.clientName || 'Cliente'})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Descripción */}
@@ -428,6 +500,7 @@ export function TaskDetailModal() {
     useTaskStore();
 
   const isEditing = Boolean(selectedTask && selectedTask.id);
+  const formKey = selectedTask?.id || `nueva-${selectedTask?.status || "pen"}-${selectedTask?.caseId || "gen"}`;
 
   return (
     <Dialog open={isModalOpen} onOpenChange={(open) => !open && closeModal()}>
@@ -440,7 +513,7 @@ export function TaskDetailModal() {
 
         {isModalOpen && (
           <TaskForm
-            key={selectedTask?.id || "nueva"}
+            key={formKey}
             task={selectedTask}
             onClose={closeModal}
             onAdd={addTask}

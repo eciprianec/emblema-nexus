@@ -118,6 +118,18 @@ export function CaseWizard() {
       status: "ACTIVO",
     });
 
+    // Aprovisionar carpetas de cliente en Nextcloud WebDAV
+    fetch("/api/integrations/nextcloud/provision", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "client",
+        clientId: created.id,
+        clientName: quickClientName.trim(),
+        docNumber: quickClientDoc.trim(),
+      }),
+    }).catch(console.error);
+
     toast.success(`Cliente "${created.nombres}" registrado exitosamente.`);
     setClienteId(created.id);
     setShowQuickClientModal(false);
@@ -180,7 +192,30 @@ export function CaseWizard() {
         descripcion: descripcion.trim(),
       });
 
-      toast.success(`¡Expediente creado con éxito! Número asignado: ${createdCase.numero}`);
+      // Aprovisionar carpetas del expediente en Nextcloud WebDAV
+      try {
+        const provRes = await fetch("/api/integrations/nextcloud/provision", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "case",
+            caseId: createdCase.id,
+            caseNumber: createdCase.numero,
+            title: createdCase.titulo,
+            area: createdCase.area,
+            clientName: createdCase.clientName,
+          }),
+        });
+        const provData = await provRes.json();
+        if (provData.success) {
+          toast.success(`¡Expediente ${createdCase.numero} creado y carpetas aprovisionadas en Nextcloud!`);
+        } else {
+          toast.success(`¡Expediente creado con éxito! Número asignado: ${createdCase.numero}`);
+        }
+      } catch {
+        toast.success(`¡Expediente creado con éxito! Número asignado: ${createdCase.numero}`);
+      }
+
       router.push(`/expedientes/${createdCase.id}`);
       router.refresh();
     } catch (err: any) {

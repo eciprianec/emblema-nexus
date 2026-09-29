@@ -15,7 +15,10 @@ interface TaskState {
   moveTaskStatus: (id: string, newStatus: TaskStatus) => void;
   toggleChecklistItem: (taskId: string, itemId: string) => void;
   
-  openCreateModal: (defaultStatus?: TaskStatus) => void;
+  openCreateModal: (
+    defaultStatus?: TaskStatus,
+    caseInfo?: { caseId?: string; caseNumber?: string; caseTitle?: string }
+  ) => void;
   openEditModal: (task: Task) => void;
   closeModal: () => void;
   setSearchQuery: (query: string) => void;
@@ -92,7 +95,7 @@ export const useTaskStore = create<TaskState>()(
     }));
   },
 
-  openCreateModal: (defaultStatus = 'pendiente') => {
+  openCreateModal: (defaultStatus = 'pendiente', caseInfo) => {
     const now = new Date();
     const pad = (n: number) => String(n).padStart(2, '0');
     const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
@@ -105,10 +108,10 @@ export const useTaskStore = create<TaskState>()(
         priority: 'normal',
         status: defaultStatus,
         dueDate: today,
-        caseId: '',
-        caseNumber: '',
-        caseTitle: '',
-        assignedTo: 'Usuario Actual',
+        caseId: caseInfo?.caseId || '',
+        caseNumber: caseInfo?.caseNumber || '',
+        caseTitle: caseInfo?.caseTitle || '',
+        assignedTo: 'Administrador',
         checklist: [],
       },
       isModalOpen: true,

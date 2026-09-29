@@ -58,11 +58,18 @@ export class NextcloudReal implements INextcloudService {
     }
   }
 
-  async createClientFolder(clientName: string): Promise<string> {
-    const sanitized = clientName.trim().replace(/[\/\\:*?"<>|]/g, "_");
-    const path = `/${sanitized}`;
-    await this.ensureDirectory(path);
-    return path;
+  async createClientFolder(clientName: string, clientId?: string): Promise<string> {
+    const sanitized = clientName.trim().replace(/[\/\\:*?"<>|#%&{}$!'@+`=]/g, "_").replace(/\s+/g, "_");
+    const cleanId = (clientId || "").trim().replace(/[^a-zA-Z0-9_-]/g, "");
+    const folderName = cleanId ? `${sanitized}_${cleanId}` : sanitized;
+    const basePath = `/nexus_storage/Clientes/${folderName}`;
+
+    await this.ensureDirectory(basePath);
+    await this.ensureDirectory(`${basePath}/01_Documentos_Identidad`);
+    await this.ensureDirectory(`${basePath}/02_Poderes_y_Contratos`);
+    await this.ensureDirectory(`${basePath}/03_Comprobantes_Fiscales`);
+
+    return basePath;
   }
 
   async createCaseFolder(
@@ -71,13 +78,18 @@ export class NextcloudReal implements INextcloudService {
     caseNumber: string,
     title: string
   ): Promise<string> {
-    const sanitizedClient = clientName.trim().replace(/[\/\\:*?"<>|]/g, "_");
-    const sanitizedArea = area.trim().replace(/[\/\\:*?"<>|]/g, "_");
-    const sanitizedCase = `${caseNumber} - ${title}`.trim().replace(/[\/\\:*?"<>|]/g, "_");
+    const sanitizedNumber = caseNumber.trim().replace(/[\/\\:*?"<>|#%&{}$!'@+`=]/g, "_").replace(/\s+/g, "_");
+    const sanitizedTitle = title.trim().replace(/[\/\\:*?"<>|#%&{}$!'@+`=]/g, "_").replace(/\s+/g, "_");
+    const folderName = `${sanitizedNumber}_${sanitizedTitle}`;
+    const basePath = `/nexus_storage/Expedientes/${folderName}`;
 
-    const fullPath = `/${sanitizedClient}/${sanitizedArea}/${sanitizedCase}`;
-    await this.ensureDirectory(fullPath);
-    return fullPath;
+    await this.ensureDirectory(basePath);
+    await this.ensureDirectory(`${basePath}/01_Actos_Notariales`);
+    await this.ensureDirectory(`${basePath}/02_Planos_y_Coordenadas`);
+    await this.ensureDirectory(`${basePath}/03_Notificaciones_Alguacil`);
+    await this.ensureDirectory(`${basePath}/04_Sentencias_y_Oficios`);
+
+    return basePath;
   }
 
   async uploadFile(remotePath: string, content: Buffer | ReadableStream): Promise<void> {

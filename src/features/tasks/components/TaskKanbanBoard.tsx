@@ -159,6 +159,17 @@ export function TaskKanbanBoard() {
           return (
             <div
               key={column.id}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                const taskId = e.dataTransfer.getData("text/plain");
+                if (taskId) {
+                  moveTaskStatus(taskId, column.id);
+                }
+              }}
               className="flex flex-col rounded-lg border border-slate-200 bg-slate-100/60 dark:border-slate-800 dark:bg-slate-900/60 p-3 min-h-[500px]"
             >
               {/* Encabezado de Columna */}
@@ -208,8 +219,13 @@ export function TaskKanbanBoard() {
                     return (
                       <div
                         key={task.id}
+                        draggable
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData("text/plain", task.id);
+                          e.dataTransfer.effectAllowed = "move";
+                        }}
                         onClick={() => openEditModal(task)}
-                        className="group relative rounded-md border border-slate-200 bg-white p-3.5 shadow-xs transition-all hover:border-slate-300 hover:shadow-sm cursor-pointer dark:border-slate-800 dark:bg-slate-900"
+                        className="group relative rounded-md border border-slate-200 bg-white p-3.5 shadow-xs transition-all hover:border-slate-300 hover:shadow-sm cursor-grab active:cursor-grabbing dark:border-slate-800 dark:bg-slate-900"
                       >
                         {/* Cabecera Tarjeta: Prioridad y Menú Rápido */}
                         <div className="flex items-center justify-between gap-2 mb-2">
@@ -271,13 +287,25 @@ export function TaskKanbanBoard() {
                           {task.title}
                         </h4>
 
-                        {/* Expediente Asociado */}
-                        {task.caseNumber && (
-                          <div className="mt-2 flex items-center gap-1 text-[11px] text-slate-500 font-mono">
-                            <Briefcase className="h-3 w-3 shrink-0" />
-                            <span className="truncate">{task.caseNumber}</span>
-                          </div>
-                        )}
+                        {/* Expediente Asociado y Responsable */}
+                        <div className="mt-2 flex items-center justify-between gap-1 text-[11px] text-slate-500">
+                          {task.caseNumber ? (
+                            <div className="flex items-center gap-1 font-mono truncate max-w-[130px]" title={task.caseNumber}>
+                              <Briefcase className="h-3 w-3 shrink-0 text-slate-400" />
+                              <span className="truncate">{task.caseNumber}</span>
+                            </div>
+                          ) : (
+                            <div />
+                          )}
+                          {task.assignedTo && (
+                            <span
+                              className="text-[10px] bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 px-1.5 py-0.5 rounded truncate max-w-[110px]"
+                              title={`Asignado a: ${task.assignedTo}`}
+                            >
+                              {task.assignedTo}
+                            </span>
+                          )}
+                        </div>
 
                         {/* Checklist Counter & Vencimiento */}
                         <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs dark:border-slate-800/80">

@@ -24,8 +24,9 @@ export class NextcloudMock implements INextcloudService {
     return false;
   }
 
-  async createClientFolder(clientName: string): Promise<string> {
-    const path = `/${clientName}`;
+  async createClientFolder(clientName: string, clientId?: string): Promise<string> {
+    const cleanId = (clientId || "").trim();
+    const path = `/nexus_storage/Clientes/${clientName}${cleanId ? `_${cleanId}` : ""}`;
     this.log("createClientFolder", path);
     return path;
   }

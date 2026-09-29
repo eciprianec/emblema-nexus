@@ -45,7 +45,28 @@ export function ClientForm() {
           ? `${data.nombres} ${data.apellidos}`
           : data.razonSocial || "Empresa";
 
-      toast.success(`Cliente "${displayName}" guardado exitosamente.`);
+      // Aprovisionar carpetas en Nextcloud WebDAV
+      try {
+        const provRes = await fetch("/api/integrations/nextcloud/provision", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "client",
+            clientId: created.id,
+            clientName: displayName,
+            docNumber: data.type === "FISICA" ? (data.cedula || data.pasaporte) : data.rnc,
+          }),
+        });
+        const provData = await provRes.json();
+        if (provData.success) {
+          toast.success(`Cliente "${displayName}" guardado y carpetas aprovisionadas en Nextcloud.`);
+        } else {
+          toast.success(`Cliente "${displayName}" guardado exitosamente.`);
+        }
+      } catch {
+        toast.success(`Cliente "${displayName}" guardado exitosamente.`);
+      }
+
       form.reset();
       router.push("/clientes");
       router.refresh();

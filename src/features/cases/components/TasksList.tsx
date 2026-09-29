@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTaskStore } from "@/features/tasks/store/useTaskStore";
+import { useCaseStore } from "@/features/cases/store/useCaseStore";
 import { TaskDetailModal } from "@/features/tasks/components/TaskDetailModal";
 import { Plus, CheckSquare, Clock, AlertTriangle, CheckCircle2, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +28,8 @@ const statusLabels: Record<string, string> = {
 
 export function TasksList({ caseId }: TasksListProps) {
   const { tasks, moveTaskStatus, openCreateModal, openEditModal } = useTaskStore();
+  const { getCaseById } = useCaseStore();
+  const caseData = getCaseById(caseId);
   const [filterStatus, setFilterStatus] = useState<string>("todas");
 
   // Filtrar tareas que correspondan a este expediente
@@ -78,7 +81,13 @@ export function TasksList({ caseId }: TasksListProps) {
           </div>
           <Button
             size="sm"
-            onClick={() => openCreateModal("pendiente")}
+            onClick={() =>
+              openCreateModal("pendiente", {
+                caseId,
+                caseNumber: caseData?.numero,
+                caseTitle: caseData?.titulo,
+              })
+            }
             className="bg-slate-900 hover:bg-slate-800 text-white text-xs h-8"
           >
             <Plus className="h-3.5 w-3.5 mr-1" />

@@ -58,6 +58,35 @@ export default function IntegracionesPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isInitializingStorage, setIsInitializingStorage] = useState(false);
+
+  const handleInitStorage = async () => {
+    setIsInitializingStorage(true);
+    const toastId = toast.loading("Inicializando estructura base en Nextcloud WebDAV...");
+    try {
+      const res = await fetch("/api/integrations/nextcloud/provision", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "init_base",
+          serverUrl: nextcloud.serverUrl,
+          username: nextcloud.username,
+          password: nextcloud.password,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(data.message || "Estructura base de directorios creada exitosamente.", { id: toastId });
+        setNextcloudStatus("connected");
+      } else {
+        toast.error(`Error: ${data.error}`, { id: toastId });
+      }
+    } catch {
+      toast.error("Error al contactar con el servidor Nextcloud.", { id: toastId });
+    } finally {
+      setIsInitializingStorage(false);
+    }
+  };
 
   // Abrir modal con los datos actuales
   const handleOpenNextcloudModal = () => {
@@ -226,7 +255,28 @@ export default function IntegracionesPage() {
                     <Unlink className="w-3.5 h-3.5 mr-1.5" />
                     Desconectar
                   </Button>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleInitStorage}
+                      disabled={isInitializingStorage}
+                      className="text-xs h-8 text-slate-700 border-slate-300"
+                      title="Inicializar directorios base /nexus_storage en Nextcloud"
+                    >
+                      <FolderOpen className={`w-3.5 h-3.5 mr-1 text-amber-600 ${isInitializingStorage ? "animate-spin" : ""}`} />
+                      {isInitializingStorage ? "Creando..." : "Inicializar Base"}
+                    </Button>
+                    <a
+                      href={`${nextcloud.serverUrl || "https://nextcloud.ciberemblema.com"}/index.php/apps/files/?dir=/nexus_storage`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center rounded-md text-xs font-medium border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 h-8 px-2.5"
+                      title="Abrir Nextcloud Web en nueva pestaña"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5 mr-1" />
+                      Abrir
+                    </a>
                     <Button
                       variant="outline"
                       size="sm"

@@ -24,6 +24,7 @@ import { ParticipantsList } from "./ParticipantsList";
 import { TasksList } from "./TasksList";
 import { ChecklistManager } from "@/features/documents/components/ChecklistManager";
 import { DocumentList } from "@/features/documents/components/DocumentList";
+import { NextcloudVaultCard } from "@/features/documents/components/NextcloudVaultCard";
 import { TemplateGeneratorModal } from "@/features/documents/components/TemplateGeneratorModal";
 import { CaseFinanceTab } from "@/features/finance/components/CaseFinanceTab";
 import { FinanceModals } from "@/features/finance/components/FinanceModals";
@@ -272,6 +273,13 @@ export function CaseDetail({ caseId }: { caseId: string }) {
         {/* PESTAÑA: DOCUMENTOS */}
         {activeTab === "documentos" && (
           <div className="space-y-6">
+            <NextcloudVaultCard
+              type="case"
+              id={caseData.id}
+              name={caseData.numero}
+              titleOrDoc={caseData.titulo}
+              area={caseData.area}
+            />
             <div className="flex justify-between items-center">
               <h3 className="text-sm font-semibold text-slate-900">Documentación del Expediente</h3>
               <TemplateGeneratorModal />

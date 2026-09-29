@@ -21,6 +21,7 @@ import { useClientStore } from "../store/useClientStore";
 import { useCaseStore } from "@/features/cases/store/useCaseStore";
 import { DocumentList } from "@/features/documents/components/DocumentList";
 import { DocumentUploader } from "@/features/documents/components/DocumentUploader";
+import { NextcloudVaultCard } from "@/features/documents/components/NextcloudVaultCard";
 import { ClientFinanceTab } from "@/features/finance/components/ClientFinanceTab";
 import { FinanceModals } from "@/features/finance/components/FinanceModals";
 import { Button } from "@/components/ui/button";
@@ -315,7 +316,13 @@ export function ClientDetail({ clientId }: { clientId: string }) {
 
         {/* PESTAÑA: DOCUMENTOS */}
         {activeTab === "documentos" && (
-          <div className="space-y-8">
+          <div className="space-y-6">
+            <NextcloudVaultCard
+              type="client"
+              id={client.id}
+              name={displayName}
+              titleOrDoc={docValue}
+            />
             <div>
               <DocumentUploader clientId={clientId} />
             </div>
