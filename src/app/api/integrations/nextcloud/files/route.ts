@@ -1,5 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from 'webdav';
+import https from 'https';
+
+const httpsAgent = new https.Agent({
+  keepAlive: true,
+  maxSockets: 25,
+  maxFreeSockets: 10,
+  timeout: 60000,
+});
+
+// Cache en memoria para navegación ultra-rápida (TTL 30s)
+interface CacheEntry {
+  data: any;
+  timestamp: number;
+}
+const directoryCache = new Map<string, CacheEntry>();
+const CACHE_TTL_MS = 30 * 1000;
+
+function invalidateDirectoryCache(pathPrefix?: string) {
+  if (!pathPrefix) {
+    directoryCache.clear();
+    return;
+  }
+  const clean = pathPrefix.replace(/\/+$/, '');
+  for (const key of Array.from(directoryCache.keys())) {
+    if (key === clean || key.startsWith(`${clean}/`) || clean.startsWith(key)) {
+      directoryCache.delete(key);
+    }
+  }
+}
 
 function getWebdavClient(override?: { serverUrl?: string; username?: string; password?: string }) {
   let baseUrl = (override?.serverUrl || process.env.NEXTCLOUD_URL || 'https://nextcloud.ciberemblema.com').trim();
@@ -18,6 +47,7 @@ function getWebdavClient(override?: { serverUrl?: string; username?: string; pas
       password,
       maxBodyLength: Infinity,
       maxContentLength: Infinity,
+      httpsAgent,
     }),
     baseUrl,
     username,
@@ -124,6 +154,7 @@ export async function POST(req: NextRequest) {
       const filePath = `${cleanTarget}/${file.name}`;
 
       await client.putFileContents(filePath, buffer);
+      invalidateDirectoryCache(cleanTarget);
 
       return NextResponse.json({
         success: true,
@@ -138,19 +169,41 @@ export async function POST(req: NextRequest) {
     const { action } = body;
     const { client, baseUrl } = getWebdavClient();
 
-    // 1. Listar contenido de un directorio
+    // 1. Listar contenido de un directorio con caché y sin llamadas redundantes
     if (action === 'list') {
       const targetPath = (body.path || '/nexus_storage').trim();
       const cleanPath = targetPath.startsWith('/') ? targetPath : `/${targetPath}`;
+      const forceRefresh = Boolean(body.refresh);
 
-      // Asegurar que /nexus_storage exista
-      await ensureDirectory(client, '/nexus_storage');
-      await ensureDirectory(client, '/nexus_storage/Clientes');
-      await ensureDirectory(client, '/nexus_storage/Expedientes');
-      await ensureDirectory(client, '/nexus_storage/Plantillas');
+      // Responder desde caché si es válido y no se forzó refresco
+      if (!forceRefresh) {
+        const cached = directoryCache.get(cleanPath);
+        if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+          return NextResponse.json({
+            ...cached.data,
+            cached: true,
+          });
+        }
+      }
 
       try {
-        const rawItems = (await client.getDirectoryContents(cleanPath)) as any[];
+        let rawItems: any[];
+        try {
+          rawItems = (await client.getDirectoryContents(cleanPath)) as any[];
+        } catch (initialErr: any) {
+          const status = initialErr?.status || initialErr?.response?.status;
+          // Si el directorio no existe aún (404), asegurar la ruta y reintentar
+          if (status === 404 || initialErr?.message?.includes('404')) {
+            await ensureDirectory(client, cleanPath);
+            try {
+              rawItems = (await client.getDirectoryContents(cleanPath)) as any[];
+            } catch {
+              rawItems = [];
+            }
+          } else {
+            throw initialErr;
+          }
+        }
 
         const items = rawItems.map((item) => {
           const isDir = item.type === 'directory';
@@ -175,12 +228,20 @@ export async function POST(req: NextRequest) {
           return a.type === 'directory' ? -1 : 1;
         });
 
-        return NextResponse.json({
+        const responsePayload = {
           success: true,
           currentPath: cleanPath,
           webUrl: `${baseUrl}/index.php/apps/files/?dir=${encodeURIComponent(cleanPath)}`,
           items,
+          cached: false,
+        };
+
+        directoryCache.set(cleanPath, {
+          data: responsePayload,
+          timestamp: Date.now(),
         });
+
+        return NextResponse.json(responsePayload);
       } catch (listErr: any) {
         return NextResponse.json({
           success: false,
@@ -202,6 +263,7 @@ export async function POST(req: NextRequest) {
       const newFolderPath = `${cleanBase}/${sanitizedName}`;
 
       await ensureDirectory(client, newFolderPath);
+      invalidateDirectoryCache(cleanBase);
 
       return NextResponse.json({
         success: true,
@@ -218,6 +280,7 @@ export async function POST(req: NextRequest) {
       }
 
       await client.deleteFile(path);
+      invalidateDirectoryCache();
 
       return NextResponse.json({
         success: true,
@@ -263,6 +326,8 @@ export async function POST(req: NextRequest) {
         await ensureDirectory(client, `${p}/04_Sentencias_y_Oficios`);
         caseCount++;
       }
+
+      invalidateDirectoryCache();
 
       return NextResponse.json({
         success: true,

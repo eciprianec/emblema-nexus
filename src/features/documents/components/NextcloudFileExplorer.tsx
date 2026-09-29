@@ -50,6 +50,12 @@ interface ExplorerItem {
   webUrl?: string;
 }
 
+interface CacheRecord {
+  items: ExplorerItem[];
+  currentPath: string;
+  timestamp: number;
+}
+
 export function NextcloudFileExplorer() {
   const { clients } = useClientStore();
   const { cases } = useCaseStore();
@@ -57,6 +63,7 @@ export function NextcloudFileExplorer() {
   const [currentPath, setCurrentPath] = useState<string>("/nexus_storage");
   const [items, setItems] = useState<ExplorerItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isRevalidating, setIsRevalidating] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
@@ -66,28 +73,104 @@ export function NextcloudFileExplorer() {
   const [newFolderName, setNewFolderName] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const clientCacheRef = useRef<Record<string, CacheRecord | undefined>>({});
+  const inFlightRef = useRef<Record<string, Promise<any> | undefined>>({});
 
-  // Cargar lista de archivos de Nextcloud
-  const fetchDirectory = async (targetPath: string) => {
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/integrations/nextcloud/files", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "list", path: targetPath }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setItems(data.items || []);
-        setCurrentPath(data.currentPath || targetPath);
-      } else {
-        toast.error(`Error al explorar: ${data.error}`);
+  // Cargar lista de archivos de Nextcloud con soporte de renderizado instantáneo (0ms) y SWR
+  const fetchDirectory = async (
+    targetPath: string,
+    options?: { forceRefresh?: boolean; isBackground?: boolean }
+  ) => {
+    const forceRefresh = options?.forceRefresh ?? false;
+    const isBackground = options?.isBackground ?? false;
+    const cached = clientCacheRef.current[targetPath];
+    const now = Date.now();
+
+    // 1. Si está en caché local y no es refresh forzado:
+    if (cached && !forceRefresh) {
+      if (!isBackground) {
+        setItems(cached.items);
+        setCurrentPath(cached.currentPath);
+        setIsLoading(false);
       }
-    } catch {
-      toast.error("Error al conectar con el servidor Nextcloud.");
-    } finally {
-      setIsLoading(false);
+
+      // Si la caché tiene menos de 20 segundos, no se requiere llamada a red
+      if (now - cached.timestamp < 20 * 1000) {
+        return;
+      }
+      // Si la caché tiene más de 20s, revalidamos silenciosamente en segundo plano
+    } else if (!isBackground) {
+      setIsLoading(true);
     }
+
+    if (cached && !isBackground) {
+      setIsRevalidating(true);
+    }
+
+    // 2. Evitar solicitudes duplicadas simultáneas
+    if (inFlightRef.current[targetPath] && !forceRefresh) {
+      try {
+        const data = await inFlightRef.current[targetPath];
+        if (data?.success && !isBackground) {
+          setItems(data.items || []);
+          setCurrentPath(data.currentPath || targetPath);
+        }
+      } finally {
+        if (!isBackground) {
+          setIsLoading(false);
+          setIsRevalidating(false);
+        }
+      }
+      return;
+    }
+
+    const fetchPromise = (async () => {
+      try {
+        const res = await fetch("/api/integrations/nextcloud/files", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "list", path: targetPath, refresh: forceRefresh }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          clientCacheRef.current[targetPath] = {
+            items: data.items || [],
+            currentPath: data.currentPath || targetPath,
+            timestamp: Date.now(),
+          };
+          if (!isBackground) {
+            setItems(data.items || []);
+            setCurrentPath(data.currentPath || targetPath);
+          }
+        } else if (!isBackground) {
+          toast.error(`Error al explorar: ${data.error}`);
+        }
+        return data;
+      } catch {
+        if (!isBackground) {
+          toast.error("Error al conectar con el servidor Nextcloud.");
+        }
+      } finally {
+        delete inFlightRef.current[targetPath];
+        if (!isBackground) {
+          setIsLoading(false);
+          setIsRevalidating(false);
+        }
+      }
+    })();
+
+    inFlightRef.current[targetPath] = fetchPromise;
+    await fetchPromise;
+  };
+
+  // Pre-cargar anticipadamente en segundo plano al pasar el ratón (hover)
+  const prefetchFolder = (folderPath: string) => {
+    if (!folderPath) return;
+    const cached = clientCacheRef.current[folderPath];
+    if (cached && Date.now() - cached.timestamp < 30 * 1000) return;
+    if (inFlightRef.current[folderPath]) return;
+
+    fetchDirectory(folderPath, { isBackground: true });
   };
 
   useEffect(() => {
@@ -132,7 +215,8 @@ export function NextcloudFileExplorer() {
         toast.success(`Carpeta "${newFolderName}" creada.`);
         setIsNewFolderOpen(false);
         setNewFolderName("");
-        fetchDirectory(currentPath);
+        delete clientCacheRef.current[currentPath];
+        fetchDirectory(currentPath, { forceRefresh: true });
       } else {
         toast.error(`Error: ${data.error}`);
       }
@@ -162,7 +246,8 @@ export function NextcloudFileExplorer() {
 
       if (data.success) {
         toast.success(`Archivo "${file.name}" subido a Nextcloud.`, { id: toastId });
-        fetchDirectory(currentPath);
+        delete clientCacheRef.current[currentPath];
+        fetchDirectory(currentPath, { forceRefresh: true });
       } else {
         toast.error(`Error al subir: ${data.error}`, { id: toastId });
       }
@@ -174,9 +259,13 @@ export function NextcloudFileExplorer() {
     }
   };
 
-  // Eliminar elemento
+  // Eliminar elemento con actualización optimista
   const handleDeleteItem = async (itemPath: string, itemName: string) => {
     if (!window.confirm(`¿Desea eliminar "${itemName}" de Nextcloud?`)) return;
+
+    const previousItems = [...items];
+    setItems((prev) => prev.filter((i) => i.path !== itemPath));
+    delete clientCacheRef.current[currentPath];
 
     try {
       const res = await fetch("/api/integrations/nextcloud/files", {
@@ -187,11 +276,13 @@ export function NextcloudFileExplorer() {
       const data = await res.json();
       if (data.success) {
         toast.success(`"${itemName}" eliminado de Nextcloud.`);
-        fetchDirectory(currentPath);
+        fetchDirectory(currentPath, { forceRefresh: true });
       } else {
+        setItems(previousItems);
         toast.error(`Error al eliminar: ${data.error}`);
       }
     } catch {
+      setItems(previousItems);
       toast.error("Error de red al intentar eliminar.");
     }
   };
@@ -214,7 +305,8 @@ export function NextcloudFileExplorer() {
       const data = await res.json();
       if (data.success) {
         toast.success(data.message, { id: toastId });
-        fetchDirectory(currentPath);
+        clientCacheRef.current = {};
+        fetchDirectory(currentPath, { forceRefresh: true });
       } else {
         toast.error(`Error en sincronización: ${data.error}`, { id: toastId });
       }
@@ -284,8 +376,9 @@ export function NextcloudFileExplorer() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <button
           type="button"
+          onMouseEnter={() => prefetchFolder("/nexus_storage/Expedientes")}
           onClick={() => handleOpenFolder("/nexus_storage/Expedientes")}
-          className={`p-3.5 rounded-lg border text-left transition-all flex items-center justify-between ${
+          className={`p-3.5 rounded-lg border text-left transition-all flex items-center justify-between cursor-pointer ${
             currentPath.startsWith("/nexus_storage/Expedientes")
               ? "bg-sky-50/70 border-sky-300 text-sky-900 shadow-xs"
               : "bg-white border-slate-200 hover:border-slate-300 text-slate-800"
@@ -305,8 +398,9 @@ export function NextcloudFileExplorer() {
 
         <button
           type="button"
+          onMouseEnter={() => prefetchFolder("/nexus_storage/Clientes")}
           onClick={() => handleOpenFolder("/nexus_storage/Clientes")}
-          className={`p-3.5 rounded-lg border text-left transition-all flex items-center justify-between ${
+          className={`p-3.5 rounded-lg border text-left transition-all flex items-center justify-between cursor-pointer ${
             currentPath.startsWith("/nexus_storage/Clientes")
               ? "bg-purple-50/70 border-purple-300 text-purple-900 shadow-xs"
               : "bg-white border-slate-200 hover:border-slate-300 text-slate-800"
@@ -326,8 +420,9 @@ export function NextcloudFileExplorer() {
 
         <button
           type="button"
+          onMouseEnter={() => prefetchFolder("/nexus_storage/Plantillas")}
           onClick={() => handleOpenFolder("/nexus_storage/Plantillas")}
-          className={`p-3.5 rounded-lg border text-left transition-all flex items-center justify-between ${
+          className={`p-3.5 rounded-lg border text-left transition-all flex items-center justify-between cursor-pointer ${
             currentPath.startsWith("/nexus_storage/Plantillas")
               ? "bg-emerald-50/70 border-emerald-300 text-emerald-900 shadow-xs"
               : "bg-white border-slate-200 hover:border-slate-300 text-slate-800"
@@ -352,18 +447,27 @@ export function NextcloudFileExplorer() {
         <div className="p-4 bg-slate-50/90 border-b border-slate-200 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           {/* Breadcrumbs de Navegación */}
           <div className="flex items-center gap-1.5 overflow-x-auto py-1 text-xs">
-            <Button
-              variant="outline"
-              size="icon"
-              disabled={currentPath === "/nexus_storage" || currentPath === "/"}
-              onClick={handleGoUp}
-              className="h-8 w-8 shrink-0 bg-white"
-              title="Subir un nivel"
-            >
-              <ArrowUp className="w-4 h-4" />
-            </Button>
+            {(() => {
+              const parts = currentPath.split("/").filter(Boolean);
+              parts.pop();
+              const parentPath = "/" + parts.join("/");
+              return (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={currentPath === "/nexus_storage" || currentPath === "/"}
+                  onMouseEnter={() => parentPath && prefetchFolder(parentPath)}
+                  onClick={handleGoUp}
+                  className="h-8 w-8 shrink-0 bg-white"
+                  title="Subir un nivel"
+                >
+                  <ArrowUp className="w-4 h-4" />
+                </Button>
+              );
+            })()}
 
             <button
+              onMouseEnter={() => prefetchFolder("/nexus_storage")}
               onClick={() => handleOpenFolder("/nexus_storage")}
               className={`font-semibold px-2 py-1 rounded hover:bg-slate-200 transition-colors shrink-0 ${
                 currentPath === "/nexus_storage"
@@ -378,6 +482,7 @@ export function NextcloudFileExplorer() {
               <React.Fragment key={seg.path}>
                 <span className="text-slate-400 shrink-0">/</span>
                 <button
+                  onMouseEnter={() => prefetchFolder(seg.path)}
                   onClick={() => handleOpenFolder(seg.path)}
                   className={`font-medium px-2 py-1 rounded hover:bg-slate-200 transition-colors shrink-0 truncate max-w-[160px] ${
                     idx === breadcrumbSegments.length - 2
@@ -447,12 +552,12 @@ export function NextcloudFileExplorer() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => fetchDirectory(currentPath)}
-              disabled={isLoading}
+              onClick={() => fetchDirectory(currentPath, { forceRefresh: true })}
+              disabled={isLoading || isRevalidating}
               className="h-8 w-8 text-slate-600"
-              title="Recargar archivos"
+              title="Recargar archivos desde Nextcloud"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${isLoading || isRevalidating ? "animate-spin text-sky-600" : ""}`} />
             </Button>
           </div>
         </div>
@@ -524,6 +629,7 @@ export function NextcloudFileExplorer() {
               return (
                 <div
                   key={item.path}
+                  onMouseEnter={() => isDir && prefetchFolder(item.path)}
                   onClick={() => isDir && handleOpenFolder(item.path)}
                   className={`p-3 sm:px-4 flex items-center justify-between gap-3 hover:bg-slate-50/80 transition-colors group ${
                     isDir ? "cursor-pointer" : ""
@@ -616,6 +722,11 @@ export function NextcloudFileExplorer() {
             </span>
           </div>
           <div className="flex items-center gap-3">
+            {isRevalidating && (
+              <span className="text-[10px] text-sky-600 flex items-center gap-1 font-medium animate-pulse">
+                <RefreshCw className="w-3 h-3 animate-spin" /> Sincronizando...
+              </span>
+            )}
             <span>
               {filteredItems.filter((i) => i.type === "directory").length} carpetas,{" "}
               {filteredItems.filter((i) => i.type === "file").length} archivos
