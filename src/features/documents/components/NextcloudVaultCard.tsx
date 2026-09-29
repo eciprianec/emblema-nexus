@@ -24,12 +24,15 @@ interface NextcloudVaultCardProps {
   name: string;
   titleOrDoc?: string;
   area?: string;
+  clientId?: string;
+  clientName?: string;
 }
 
 const CLIENT_SUBFOLDERS = [
-  { name: '01_Documentos_Identidad', desc: 'Cédulas de identidad, RNC, actas de nacimiento y pasaportes' },
-  { name: '02_Poderes_y_Contratos', desc: 'Poderes de representación, contratos de cuota litis y acuerdos' },
-  { name: '03_Comprobantes_Fiscales', desc: 'Facturas con valor fiscal, recibos de ingresos y pagos de tasas' },
+  { name: 'Datos_Recurrentes', desc: 'Cédula de identidad, pasaporte, RNC, poderes generales y documentos recurrentes' },
+  { name: 'Legal', desc: 'Expedientes, litigios y actos notariales de este cliente' },
+  { name: 'Agrimensura', desc: 'Expedientes catastrales, deslindes, mensuras y coordenadas de este cliente' },
+  { name: 'Inmobiliaria', desc: 'Operaciones inmobiliarias, compras, ventas y contratos de este cliente' },
 ];
 
 const CASE_SUBFOLDERS = [
@@ -45,6 +48,8 @@ export function NextcloudVaultCard({
   name,
   titleOrDoc,
   area,
+  clientId,
+  clientName,
 }: NextcloudVaultCardProps) {
   const [isProvisioning, setIsProvisioning] = useState(false);
   const [hasCopied, setHasCopied] = useState(false);
@@ -62,10 +67,24 @@ export function NextcloudVaultCard({
     .replace(/[\/\\:*?"<>|#%&{}$!'@+`=]/g, '_')
     .replace(/\s+/g, '_');
 
+  // Para expedientes, determinar área y cliente
+  const normArea = (area || 'LEGAL').toUpperCase();
+  const areaFolder =
+    normArea === 'AGRIMENSURA'
+      ? 'Agrimensura'
+      : normArea === 'INMOBILIARIA'
+      ? 'Inmobiliaria'
+      : 'Legal';
+
+  const rawClient = (clientName || 'Cliente_General').trim();
+  const sanitizedClient = rawClient.replace(/[\/\\:*?"<>|#%&{}$!'@+`=]/g, '_').replace(/\s+/g, '_');
+  const cleanClientId = (clientId || '').trim().replace(/[^a-zA-Z0-9_-]/g, '');
+  const clientFolderName = cleanClientId ? `${sanitizedClient}_${cleanClientId}` : sanitizedClient;
+
   const folderPath =
     type === 'client'
       ? `/nexus_storage/Clientes/${cleanId ? `${sanitizedName}_${cleanId}` : sanitizedName}`
-      : `/nexus_storage/Expedientes/${sanitizedName}_${sanitizedTitle}`;
+      : `/nexus_storage/Clientes/${clientFolderName}/${areaFolder}/${sanitizedName}_${sanitizedTitle}`;
 
   const nextcloudWebUrl = `https://nextcloud.ciberemblema.com/index.php/apps/files/?dir=${encodeURIComponent(
     folderPath
@@ -99,6 +118,8 @@ export function NextcloudVaultCard({
               caseNumber: name,
               title: titleOrDoc || 'Expediente',
               area,
+              clientId,
+              clientName,
             };
 
       const res = await fetch('/api/integrations/nextcloud/provision', {

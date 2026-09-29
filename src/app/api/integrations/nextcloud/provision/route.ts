@@ -65,13 +65,12 @@ export async function POST(request: Request) {
     // Ensure root storage base folders
     await ensureDirectory(client, '/nexus_storage');
     await ensureDirectory(client, '/nexus_storage/Clientes');
-    await ensureDirectory(client, '/nexus_storage/Expedientes');
     await ensureDirectory(client, '/nexus_storage/Plantillas');
 
     if (type === 'init_base') {
       return NextResponse.json({
         success: true,
-        message: 'Estructura base de Nextcloud (/nexus_storage, Clientes, Expedientes, Plantillas) verificada y lista.',
+        message: 'Estructura base de Nextcloud (/nexus_storage, Clientes, Plantillas) verificada y lista.',
       });
     }
 
@@ -91,9 +90,13 @@ export async function POST(request: Request) {
       const folderPath = `/nexus_storage/Clientes/${folderName}`;
 
       const subfolders = [
-        '01_Documentos_Identidad',
-        '02_Poderes_y_Contratos',
-        '03_Comprobantes_Fiscales',
+        'Datos_Recurrentes',
+        'Datos_Recurrentes/01_Cedula_o_Pasaporte',
+        'Datos_Recurrentes/02_RNC_y_Registro_Mercantil',
+        'Datos_Recurrentes/03_Poderes_y_Documentos_Generales',
+        'Legal',
+        'Agrimensura',
+        'Inmobiliaria',
       ];
 
       // Provision folder and subfolders
@@ -106,7 +109,7 @@ export async function POST(request: Request) {
 
       return NextResponse.json({
         success: true,
-        message: `Carpetas del cliente "${rawName}" aprovisionadas en Nextcloud.`,
+        message: `Carpetas del cliente "${rawName}" (Datos Recurrentes, Legal, Agrimensura, Inmobiliaria) aprovisionadas en Nextcloud.`,
         folderPath,
         folderName,
         webUrl,
@@ -115,7 +118,7 @@ export async function POST(request: Request) {
     }
 
     if (type === 'case') {
-      const { caseNumber, title } = body;
+      const { caseNumber, title, area, clientId, clientName } = body;
       if (!caseNumber && !title) {
         return NextResponse.json(
           { success: false, error: 'Se requiere el número o título del expediente.' },
@@ -127,8 +130,24 @@ export async function POST(request: Request) {
       const rawTitle = (title || 'General').trim();
       const sanitizedNumber = rawNumber.replace(/[\/\\:*?"<>|#%&{}$!'@+`=]/g, '_').replace(/\s+/g, '_');
       const sanitizedTitle = rawTitle.replace(/[\/\\:*?"<>|#%&{}$!'@+`=]/g, '_').replace(/\s+/g, '_');
-      const folderName = `${sanitizedNumber}_${sanitizedTitle}`;
-      const folderPath = `/nexus_storage/Expedientes/${folderName}`;
+      const caseFolderName = `${sanitizedNumber}_${sanitizedTitle}`;
+
+      // Determinar carpeta del cliente
+      const rawClient = (clientName || 'Cliente_General').trim();
+      const sanitizedClient = rawClient.replace(/[\/\\:*?"<>|#%&{}$!'@+`=]/g, '_').replace(/\s+/g, '_');
+      const cleanClientId = (clientId || '').trim().replace(/[^a-zA-Z0-9_-]/g, '');
+      const clientFolderName = cleanClientId ? `${sanitizedClient}_${cleanClientId}` : sanitizedClient;
+
+      // Normalizar área (Legal, Agrimensura, Inmobiliaria)
+      const normArea = (area || 'LEGAL').toUpperCase();
+      const areaFolder =
+        normArea === 'AGRIMENSURA'
+          ? 'Agrimensura'
+          : normArea === 'INMOBILIARIA'
+          ? 'Inmobiliaria'
+          : 'Legal';
+
+      const folderPath = `/nexus_storage/Clientes/${clientFolderName}/${areaFolder}/${caseFolderName}`;
 
       const subfolders = [
         '01_Actos_Notariales',
@@ -147,9 +166,11 @@ export async function POST(request: Request) {
 
       return NextResponse.json({
         success: true,
-        message: `Carpetas del expediente "${rawNumber}" aprovisionadas en Nextcloud.`,
+        message: `Carpetas del expediente "${rawNumber}" en ${areaFolder} del cliente "${rawClient}" aprovisionadas en Nextcloud.`,
         folderPath,
-        folderName,
+        folderName: caseFolderName,
+        areaFolder,
+        clientFolderName,
         webUrl,
         subfolders,
       });

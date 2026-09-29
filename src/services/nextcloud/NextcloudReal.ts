@@ -65,9 +65,13 @@ export class NextcloudReal implements INextcloudService {
     const basePath = `/nexus_storage/Clientes/${folderName}`;
 
     await this.ensureDirectory(basePath);
-    await this.ensureDirectory(`${basePath}/01_Documentos_Identidad`);
-    await this.ensureDirectory(`${basePath}/02_Poderes_y_Contratos`);
-    await this.ensureDirectory(`${basePath}/03_Comprobantes_Fiscales`);
+    await this.ensureDirectory(`${basePath}/Datos_Recurrentes`);
+    await this.ensureDirectory(`${basePath}/Datos_Recurrentes/01_Cedula_o_Pasaporte`);
+    await this.ensureDirectory(`${basePath}/Datos_Recurrentes/02_RNC_y_Registro_Mercantil`);
+    await this.ensureDirectory(`${basePath}/Datos_Recurrentes/03_Poderes_y_Documentos_Generales`);
+    await this.ensureDirectory(`${basePath}/Legal`);
+    await this.ensureDirectory(`${basePath}/Agrimensura`);
+    await this.ensureDirectory(`${basePath}/Inmobiliaria`);
 
     return basePath;
   }
@@ -76,12 +80,26 @@ export class NextcloudReal implements INextcloudService {
     clientName: string,
     area: string,
     caseNumber: string,
-    title: string
+    title: string,
+    clientId?: string
   ): Promise<string> {
+    const sanitizedClient = clientName.trim().replace(/[\/\\:*?"<>|#%&{}$!'@+`=]/g, "_").replace(/\s+/g, "_");
+    const cleanClientId = (clientId || "").trim().replace(/[^a-zA-Z0-9_-]/g, "");
+    const clientFolderName = cleanClientId ? `${sanitizedClient}_${cleanClientId}` : sanitizedClient;
+
+    const normArea = (area || "LEGAL").toUpperCase();
+    const areaFolder =
+      normArea === "AGRIMENSURA"
+        ? "Agrimensura"
+        : normArea === "INMOBILIARIA"
+        ? "Inmobiliaria"
+        : "Legal";
+
     const sanitizedNumber = caseNumber.trim().replace(/[\/\\:*?"<>|#%&{}$!'@+`=]/g, "_").replace(/\s+/g, "_");
     const sanitizedTitle = title.trim().replace(/[\/\\:*?"<>|#%&{}$!'@+`=]/g, "_").replace(/\s+/g, "_");
-    const folderName = `${sanitizedNumber}_${sanitizedTitle}`;
-    const basePath = `/nexus_storage/Expedientes/${folderName}`;
+    const caseFolderName = `${sanitizedNumber}_${sanitizedTitle}`;
+
+    const basePath = `/nexus_storage/Clientes/${clientFolderName}/${areaFolder}/${caseFolderName}`;
 
     await this.ensureDirectory(basePath);
     await this.ensureDirectory(`${basePath}/01_Actos_Notariales`);

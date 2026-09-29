@@ -376,28 +376,6 @@ export function NextcloudFileExplorer() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <button
           type="button"
-          onMouseEnter={() => prefetchFolder("/nexus_storage/Expedientes")}
-          onClick={() => handleOpenFolder("/nexus_storage/Expedientes")}
-          className={`p-3.5 rounded-lg border text-left transition-all flex items-center justify-between cursor-pointer ${
-            currentPath.startsWith("/nexus_storage/Expedientes")
-              ? "bg-sky-50/70 border-sky-300 text-sky-900 shadow-xs"
-              : "bg-white border-slate-200 hover:border-slate-300 text-slate-800"
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-sky-100 rounded-md text-sky-700">
-              <Briefcase className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider">Expedientes</h4>
-              <p className="text-[11px] text-slate-500">Planos, actos, oficios</p>
-            </div>
-          </div>
-          <ChevronRight className="w-4 h-4 text-slate-400" />
-        </button>
-
-        <button
-          type="button"
           onMouseEnter={() => prefetchFolder("/nexus_storage/Clientes")}
           onClick={() => handleOpenFolder("/nexus_storage/Clientes")}
           className={`p-3.5 rounded-lg border text-left transition-all flex items-center justify-between cursor-pointer ${
@@ -411,8 +389,8 @@ export function NextcloudFileExplorer() {
               <Users className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider">Clientes</h4>
-              <p className="text-[11px] text-slate-500">Identidad, contratos, e-CF</p>
+              <h4 className="text-xs font-bold uppercase tracking-wider">Clientes (Principal)</h4>
+              <p className="text-[11px] text-slate-500">Legal, Agrimensura, Inmobiliaria y Datos</p>
             </div>
           </div>
           <ChevronRight className="w-4 h-4 text-slate-400" />
@@ -435,6 +413,28 @@ export function NextcloudFileExplorer() {
             <div>
               <h4 className="text-xs font-bold uppercase tracking-wider">Plantillas DOCX</h4>
               <p className="text-[11px] text-slate-500">Modelos legales notariales</p>
+            </div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-slate-400" />
+        </button>
+
+        <button
+          type="button"
+          onMouseEnter={() => prefetchFolder("/nexus_storage")}
+          onClick={() => handleOpenFolder("/nexus_storage")}
+          className={`p-3.5 rounded-lg border text-left transition-all flex items-center justify-between cursor-pointer ${
+            currentPath === "/nexus_storage"
+              ? "bg-slate-100 border-slate-400 text-slate-900 shadow-xs"
+              : "bg-white border-slate-200 hover:border-slate-300 text-slate-800"
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-slate-100 rounded-md text-slate-700">
+              <HardDrive className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider">Almacén Raíz</h4>
+              <p className="text-[11px] text-slate-500">/nexus_storage completo</p>
             </div>
           </div>
           <ChevronRight className="w-4 h-4 text-slate-400" />

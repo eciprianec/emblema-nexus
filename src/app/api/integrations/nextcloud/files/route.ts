@@ -288,14 +288,17 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 4. Sincronizar masivamente clientes y casos
+    // 4. Sincronizar masivamente clientes y casos bajo la estructura cliente-céntrica
     if (action === 'sync_all') {
       const { clients = [], cases = [] } = body;
 
       await ensureDirectory(client, '/nexus_storage');
       await ensureDirectory(client, '/nexus_storage/Clientes');
-      await ensureDirectory(client, '/nexus_storage/Expedientes');
       await ensureDirectory(client, '/nexus_storage/Plantillas');
+
+      // Mapas de búsqueda para vincular cada expediente con su cliente
+      const clientPathById = new Map<string, string>();
+      const clientPathByName = new Map<string, string>();
 
       let clientCount = 0;
       for (const cl of clients) {
@@ -306,9 +309,19 @@ export async function POST(req: NextRequest) {
         const p = `/nexus_storage/Clientes/${folderName}`;
 
         await ensureDirectory(client, p);
-        await ensureDirectory(client, `${p}/01_Documentos_Identidad`);
-        await ensureDirectory(client, `${p}/02_Poderes_y_Contratos`);
-        await ensureDirectory(client, `${p}/03_Comprobantes_Fiscales`);
+        // Carpeta de datos recurrentes del cliente
+        await ensureDirectory(client, `${p}/Datos_Recurrentes`);
+        await ensureDirectory(client, `${p}/Datos_Recurrentes/01_Cedula_o_Pasaporte`);
+        await ensureDirectory(client, `${p}/Datos_Recurrentes/02_RNC_y_Registro_Mercantil`);
+        await ensureDirectory(client, `${p}/Datos_Recurrentes/03_Poderes_y_Documentos_Generales`);
+        // Subcarpetas por área
+        await ensureDirectory(client, `${p}/Legal`);
+        await ensureDirectory(client, `${p}/Agrimensura`);
+        await ensureDirectory(client, `${p}/Inmobiliaria`);
+
+        if (cleanId) clientPathById.set(cleanId, p);
+        if (cl.id) clientPathById.set(cl.id, p);
+        clientPathByName.set(rawName.toLowerCase().trim(), p);
         clientCount++;
       }
 
@@ -316,14 +329,45 @@ export async function POST(req: NextRequest) {
       for (const cs of cases) {
         const num = (cs.numero || 'EXP').trim().replace(/[\/\\:*?"<>|#%&{}$!'@+`=]/g, '_').replace(/\s+/g, '_');
         const tit = (cs.titulo || 'General').trim().replace(/[\/\\:*?"<>|#%&{}$!'@+`=]/g, '_').replace(/\s+/g, '_');
-        const folderName = `${num}_${tit}`;
-        const p = `/nexus_storage/Expedientes/${folderName}`;
+        const caseFolderName = `${num}_${tit}`;
 
-        await ensureDirectory(client, p);
-        await ensureDirectory(client, `${p}/01_Actos_Notariales`);
-        await ensureDirectory(client, `${p}/02_Planos_y_Coordenadas`);
-        await ensureDirectory(client, `${p}/03_Notificaciones_Alguacil`);
-        await ensureDirectory(client, `${p}/04_Sentencias_y_Oficios`);
+        const normArea = (cs.area || 'LEGAL').toUpperCase();
+        const areaFolder =
+          normArea === 'AGRIMENSURA'
+            ? 'Agrimensura'
+            : normArea === 'INMOBILIARIA'
+            ? 'Inmobiliaria'
+            : 'Legal';
+
+        // Buscar carpeta del cliente correspondiente
+        let clientBasePath =
+          (cs.clienteId && clientPathById.get(cs.clienteId)) ||
+          (cs.clientName && clientPathByName.get(cs.clientName.toLowerCase().trim()));
+
+        if (!clientBasePath) {
+          const rawClient = (cs.clientName || 'Cliente_General').trim();
+          const sanitizedClient = rawClient.replace(/[\/\\:*?"<>|#%&{}$!'@+`=]/g, '_').replace(/\s+/g, '_');
+          const cleanClientId = (cs.clienteId || '').trim().replace(/[^a-zA-Z0-9_-]/g, '');
+          const clientFolderName = cleanClientId ? `${sanitizedClient}_${cleanClientId}` : sanitizedClient;
+          clientBasePath = `/nexus_storage/Clientes/${clientFolderName}`;
+
+          await ensureDirectory(client, clientBasePath);
+          await ensureDirectory(client, `${clientBasePath}/Datos_Recurrentes`);
+          await ensureDirectory(client, `${clientBasePath}/Datos_Recurrentes/01_Cedula_o_Pasaporte`);
+          await ensureDirectory(client, `${clientBasePath}/Datos_Recurrentes/02_RNC_y_Registro_Mercantil`);
+          await ensureDirectory(client, `${clientBasePath}/Datos_Recurrentes/03_Poderes_y_Documentos_Generales`);
+          await ensureDirectory(client, `${clientBasePath}/Legal`);
+          await ensureDirectory(client, `${clientBasePath}/Agrimensura`);
+          await ensureDirectory(client, `${clientBasePath}/Inmobiliaria`);
+        }
+
+        const casePath = `${clientBasePath}/${areaFolder}/${caseFolderName}`;
+
+        await ensureDirectory(client, casePath);
+        await ensureDirectory(client, `${casePath}/01_Actos_Notariales`);
+        await ensureDirectory(client, `${casePath}/02_Planos_y_Coordenadas`);
+        await ensureDirectory(client, `${casePath}/03_Notificaciones_Alguacil`);
+        await ensureDirectory(client, `${casePath}/04_Sentencias_y_Oficios`);
         caseCount++;
       }
 
@@ -331,7 +375,7 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: `Sincronizados ${clientCount} clientes y ${caseCount} expedientes en Nextcloud.`,
+        message: `Sincronizados ${clientCount} clientes y ${caseCount} expedientes organizados por áreas (Legal, Agrimensura, Inmobiliaria) en Nextcloud.`,
         clientCount,
         caseCount,
       });

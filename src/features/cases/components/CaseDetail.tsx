@@ -279,6 +279,8 @@ export function CaseDetail({ caseId }: { caseId: string }) {
               name={caseData.numero}
               titleOrDoc={caseData.titulo}
               area={caseData.area}
+              clientId={caseData.clienteId}
+              clientName={caseData.clientName}
             />
             <div className="flex justify-between items-center">
               <h3 className="text-sm font-semibold text-slate-900">Documentación del Expediente</h3>

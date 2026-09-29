@@ -203,6 +203,7 @@ export function CaseWizard() {
             caseNumber: createdCase.numero,
             title: createdCase.titulo,
             area: createdCase.area,
+            clientId: createdCase.clienteId,
             clientName: createdCase.clientName,
           }),
         });
