@@ -2,246 +2,231 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Search, UserPlus, Trash2, Edit2, Phone, Mail, Building, User as UserIcon, AlertTriangle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Archive, ArchiveRestore, Building, Edit2, Mail, Phone, Search, User as UserIcon, UserPlus } from "lucide-react";
 import { toast } from "sonner";
-import { useClientStore } from "../store/useClientStore";
-import { Client, ClientType } from "../types";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { archiveClientAction, restoreClientAction } from "../actions/client-actions";
+import { clientName } from "../mapping";
+import type { Client } from "../types";
+import { ClientEditDialog } from "./ClientEditDialog";
 
-export default function ClientList() {
-  const { clients, deleteClient, updateClient } = useClientStore();
-  const [search, setSearch] = React.useState("");
-  const [typeFilter, setTypeFilter] = React.useState<string>("TODOS");
-  const [clientToDelete, setClientToDelete] = React.useState<Client | null>(null);
+interface ClientListProps {
+  clients: Client[];
+  counts: { all: number; fisica: number; juridica: number };
+  filters: { q?: string; tipo?: string; archivados: boolean };
+  can: { create: boolean; edit: boolean; archive: boolean };
+}
+
+export default function ClientList({ clients, counts, filters, can }: ClientListProps) {
+  const router = useRouter();
+  const [pending, startTransition] = React.useTransition();
+  const [clientToArchive, setClientToArchive] = React.useState<Client | null>(null);
   const [clientToEdit, setClientToEdit] = React.useState<Client | null>(null);
+  const filtered = Boolean(filters.q || filters.tipo);
 
-  const [editFormData, setEditFormData] = React.useState({
-    nombres: "",
-    apellidos: "",
-    razonSocial: "",
-    cedula: "",
-    rnc: "",
-    telefono: "",
-    email: "",
-    direccion: "",
-  });
-
-  React.useEffect(() => {
-    if (clientToEdit) {
-      setEditFormData({
-        nombres: clientToEdit.nombres || "",
-        apellidos: clientToEdit.apellidos || "",
-        razonSocial: clientToEdit.razonSocial || "",
-        cedula: clientToEdit.cedula || "",
-        rnc: clientToEdit.rnc || "",
-        telefono: clientToEdit.telefono || "",
-        email: clientToEdit.email || "",
-        direccion: clientToEdit.direccion || "",
-      });
-    }
-  }, [clientToEdit]);
-
-  const filteredClients = React.useMemo(() => {
-    return clients.filter((c) => {
-      const displayName =
-        c.type === "FISICA" ? `${c.nombres || ""} ${c.apellidos || ""}` : c.razonSocial || "";
-      const doc = c.type === "FISICA" ? c.cedula || c.pasaporte || "" : c.rnc || "";
-
-      const matchSearch =
-        search === "" ||
-        displayName.toLowerCase().includes(search.toLowerCase()) ||
-        doc.includes(search) ||
-        c.email.toLowerCase().includes(search.toLowerCase()) ||
-        c.telefono.includes(search);
-
-      const matchType = typeFilter === "TODOS" || c.type === typeFilter;
-
-      return matchSearch && matchType;
+  const handleArchiveConfirm = () => {
+    if (!clientToArchive) return;
+    startTransition(async () => {
+      const result = await archiveClientAction(clientToArchive.id);
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success("Cliente archivado.");
+      setClientToArchive(null);
+      router.refresh();
     });
-  }, [clients, search, typeFilter]);
-
-  const handleDeleteConfirm = () => {
-    if (!clientToDelete) return;
-    deleteClient(clientToDelete.id);
-    toast.success("Cliente eliminado exitosamente.");
-    setClientToDelete(null);
   };
 
-  const handleEditSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!clientToEdit) return;
-
-    updateClient(clientToEdit.id, editFormData);
-    toast.success("Datos del cliente actualizados.");
-    setClientToEdit(null);
+  const handleRestore = (client: Client) => {
+    startTransition(async () => {
+      const result = await restoreClientAction(client.id);
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success("Cliente restaurado.");
+      router.refresh();
+    });
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-      {/* Barra de Filtros y Búsqueda */}
-      <div className="p-4 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <div className="flex flex-1 items-center gap-3">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
+    <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+      {/* Filtros por la URL: la búsqueda corre en la base y cubre a todos los clientes */}
+      <form
+        action="/clientes"
+        className="flex flex-col items-stretch justify-between gap-3 border-b border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center"
+      >
+        <div className="flex flex-1 flex-wrap items-center gap-3">
+          <div className="relative min-w-48 max-w-sm flex-1">
+            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" aria-hidden />
             <Input
               type="text"
-              placeholder="Buscar por nombre, RNC, cédula, email..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-8 text-xs h-8 border-slate-300 bg-white"
+              name="q"
+              aria-label="Buscar clientes"
+              placeholder="Buscar por nombre, RNC, cédula, correo..."
+              defaultValue={filters.q}
+              className="h-8 border-slate-300 bg-white pl-8 text-xs"
             />
           </div>
 
           <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="text-xs h-8 rounded-md border border-slate-300 bg-white px-2 text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-900"
+            name="tipo"
+            aria-label="Filtrar por tipo"
+            defaultValue={filters.tipo ?? ""}
+            className="h-8 rounded-md border border-slate-300 bg-white px-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-900"
           >
-            <option value="TODOS">Todos los tipos ({clients.length})</option>
-            <option value="FISICA">Persona Física ({clients.filter((c) => c.type === "FISICA").length})</option>
-            <option value="JURIDICA">Persona Jurídica ({clients.filter((c) => c.type === "JURIDICA").length})</option>
+            <option value="">Todos los tipos ({counts.all})</option>
+            <option value="FISICA">Persona física ({counts.fisica})</option>
+            <option value="JURIDICA">Persona jurídica ({counts.juridica})</option>
           </select>
+
+          <label className="flex items-center gap-1.5 text-xs text-slate-600">
+            <input type="checkbox" name="archivados" value="1" defaultChecked={filters.archivados} />
+            Archivados
+          </label>
+
+          <Button type="submit" variant="outline" size="sm" className="h-8 text-xs">
+            Filtrar
+          </Button>
         </div>
 
-        <Link href="/clientes/nuevo">
-          <Button size="sm" className="bg-slate-900 hover:bg-slate-800 text-white text-xs h-8">
-            <UserPlus className="h-3.5 w-3.5 mr-1.5" />
-            + Nuevo Cliente
+        {can.create && (
+          <Button asChild size="sm" className="h-8 bg-slate-900 text-xs text-white hover:bg-slate-800">
+            <Link href="/clientes/nuevo">
+              <UserPlus className="mr-1.5 h-3.5 w-3.5" aria-hidden />
+              Nuevo cliente
+            </Link>
           </Button>
-        </Link>
-      </div>
+        )}
+      </form>
 
-      {/* Tabla de Clientes */}
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-slate-200">
           <thead className="bg-slate-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                Nombre / Razón Social
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                Documento
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                Tipo
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                Contacto
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                Acciones
-              </th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Nombre / Razón social</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Documento</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Tipo</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Contacto</th>
+              <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">Acciones</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-slate-200 text-xs">
-            {filteredClients.length === 0 ? (
+          <tbody className="divide-y divide-slate-200 bg-white text-xs">
+            {clients.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
                   <div className="flex flex-col items-center justify-center">
-                    <UserIcon className="h-10 w-10 text-slate-300 mb-2" />
-                    <p className="text-sm font-semibold text-slate-700">No hay clientes registrados</p>
-                    <p className="text-xs text-slate-500 mt-1 max-w-sm">
-                      {search || typeFilter !== "TODOS"
-                        ? "No se encontraron clientes que coincidan con la búsqueda."
-                        : "Haga clic en '+ Nuevo Cliente' para registrar el primer cliente en la base de datos."}
+                    <UserIcon className="mb-2 h-10 w-10 text-slate-300" aria-hidden />
+                    <p className="text-sm font-semibold text-slate-700">
+                      {filters.archivados ? "No hay clientes archivados" : "No hay clientes registrados"}
                     </p>
-                    <Link href="/clientes/nuevo" className="mt-3">
-                      <Button size="sm" className="bg-slate-900 hover:bg-slate-800 text-white text-xs">
-                        + Registrar Primer Cliente
-                      </Button>
-                    </Link>
+                    <p className="mt-1 max-w-sm text-xs text-slate-500">
+                      {filtered ? "Ningún cliente coincide con la búsqueda." : "Los clientes que registres aquí aparecen al facturar."}
+                    </p>
                   </div>
                 </td>
               </tr>
             ) : (
-              filteredClients.map((client) => {
+              clients.map((client) => {
                 const isFisica = client.type === "FISICA";
-                const displayName = isFisica
-                  ? `${client.nombres || ""} ${client.apellidos || ""}`
-                  : client.razonSocial || "Sin Razón Social";
                 const docText = isFisica
-                  ? client.cedula ? `Céd: ${client.cedula}` : client.pasaporte ? `Pas: ${client.pasaporte}` : "-"
-                  : client.rnc ? `RNC: ${client.rnc}` : "-";
+                  ? client.cedula
+                    ? `Céd: ${client.cedula}`
+                    : client.pasaporte
+                      ? `Pas: ${client.pasaporte}`
+                      : "-"
+                  : client.rnc
+                    ? `RNC: ${client.rnc}`
+                    : "-";
 
                 return (
-                  <tr key={client.id} className="hover:bg-slate-50/70 transition-colors">
-                    <td className="px-6 py-3.5 whitespace-nowrap">
+                  <tr key={client.id} className="transition-colors hover:bg-slate-50/70">
+                    <td className="whitespace-nowrap px-6 py-3.5">
                       <div className="flex items-center gap-2.5">
-                        <div className="h-7 w-7 rounded-full bg-slate-100 border border-slate-200 text-slate-700 font-semibold text-xs flex items-center justify-center shrink-0">
-                          {isFisica ? <UserIcon className="h-3.5 w-3.5" /> : <Building className="h-3.5 w-3.5" />}
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-xs font-semibold text-slate-700">
+                          {isFisica ? <UserIcon className="h-3.5 w-3.5" aria-hidden /> : <Building className="h-3.5 w-3.5" aria-hidden />}
                         </div>
                         <div>
-                          <div className="font-semibold text-slate-900">{displayName}</div>
-                          {client.direccion && (
-                            <div className="text-[11px] text-slate-500 truncate max-w-xs">{client.direccion}</div>
-                          )}
+                          <div className="font-semibold text-slate-900">{clientName(client)}</div>
+                          {client.direccion && <div className="max-w-xs truncate text-[11px] text-slate-500">{client.direccion}</div>}
                         </div>
                       </div>
                     </td>
 
-                    <td className="px-6 py-3.5 whitespace-nowrap font-mono text-slate-600">
-                      {docText}
-                    </td>
+                    <td className="whitespace-nowrap px-6 py-3.5 font-mono text-slate-600">{docText}</td>
 
-                    <td className="px-6 py-3.5 whitespace-nowrap">
+                    <td className="whitespace-nowrap px-6 py-3.5">
                       <span
-                        className={`px-2 py-0.5 inline-flex text-[10px] leading-4 font-semibold rounded-full ${
-                          isFisica
-                            ? "bg-blue-100 text-blue-800 border border-blue-200"
-                            : "bg-purple-100 text-purple-800 border border-purple-200"
+                        className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold leading-4 ${
+                          isFisica ? "border border-blue-200 bg-blue-100 text-blue-800" : "border border-purple-200 bg-purple-100 text-purple-800"
                         }`}
                       >
                         {isFisica ? "Física" : "Jurídica"}
                       </span>
                     </td>
 
-                    <td className="px-6 py-3.5 whitespace-nowrap text-slate-600">
+                    <td className="whitespace-nowrap px-6 py-3.5 text-slate-600">
                       <div className="flex flex-col gap-0.5">
-                        <span className="inline-flex items-center gap-1 text-[11px]">
-                          <Mail className="h-3 w-3 text-slate-400" />
-                          {client.email}
-                        </span>
+                        {client.email && (
+                          <span className="inline-flex items-center gap-1 text-[11px]">
+                            <Mail className="h-3 w-3 text-slate-400" aria-hidden />
+                            {client.email}
+                          </span>
+                        )}
                         {client.telefono && (
                           <span className="inline-flex items-center gap-1 text-[11px] text-slate-500">
-                            <Phone className="h-3 w-3 text-slate-400" />
+                            <Phone className="h-3 w-3 text-slate-400" aria-hidden />
                             {client.telefono}
                           </span>
                         )}
                       </div>
                     </td>
 
-                    <td className="px-6 py-3.5 whitespace-nowrap text-right text-xs font-medium space-x-2">
+                    <td className="space-x-2 whitespace-nowrap px-6 py-3.5 text-right text-xs font-medium">
                       <Link
                         href={`/clientes/${client.id}`}
-                        className="inline-flex items-center px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+                        className="inline-flex items-center rounded bg-slate-100 px-2 py-1 text-slate-700 transition-colors hover:bg-slate-200"
                       >
-                        Ver Ficha
+                        Ver ficha
                       </Link>
-                      <button
-                        type="button"
-                        onClick={() => setClientToEdit(client)}
-                        className="inline-flex items-center px-2 py-1 rounded text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-                        title="Editar cliente"
-                      >
-                        <Edit2 className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setClientToDelete(client)}
-                        className="inline-flex items-center px-2 py-1 rounded text-rose-600 hover:text-rose-800 hover:bg-rose-50 transition-colors"
-                        title="Eliminar cliente"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+                      {can.edit && !filters.archivados && (
+                        <button
+                          type="button"
+                          onClick={() => setClientToEdit(client)}
+                          className="inline-flex items-center rounded px-2 py-1 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                          title="Editar cliente"
+                          aria-label={`Editar ${clientName(client)}`}
+                        >
+                          <Edit2 className="h-3.5 w-3.5" aria-hidden />
+                        </button>
+                      )}
+                      {can.archive &&
+                        (filters.archivados ? (
+                          <button
+                            type="button"
+                            disabled={pending}
+                            onClick={() => handleRestore(client)}
+                            className="inline-flex items-center rounded px-2 py-1 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                            title="Restaurar cliente"
+                            aria-label={`Restaurar ${clientName(client)}`}
+                          >
+                            <ArchiveRestore className="h-3.5 w-3.5" aria-hidden />
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setClientToArchive(client)}
+                            className="inline-flex items-center rounded px-2 py-1 text-rose-600 transition-colors hover:bg-rose-50 hover:text-rose-800"
+                            title="Archivar cliente"
+                            aria-label={`Archivar ${clientName(client)}`}
+                          >
+                            <Archive className="h-3.5 w-3.5" aria-hidden />
+                          </button>
+                        ))}
                     </td>
                   </tr>
                 );
@@ -251,148 +236,29 @@ export default function ClientList() {
         </table>
       </div>
 
-      {/* Modal Editar Cliente */}
-      <Dialog open={!!clientToEdit} onOpenChange={() => setClientToEdit(null)}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900">Editar Datos del Cliente</DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
-              Modifique la información de contacto y fiscal del cliente.
-            </DialogDescription>
-          </DialogHeader>
+      {clientToEdit && <ClientEditDialog client={clientToEdit} onClose={() => setClientToEdit(null)} />}
 
-          {clientToEdit && (
-            <form onSubmit={handleEditSubmit} className="space-y-4 pt-2">
-              {clientToEdit.type === "FISICA" ? (
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-700 mb-1">Nombres *</label>
-                    <Input
-                      required
-                      value={editFormData.nombres}
-                      onChange={(e) => setEditFormData({ ...editFormData, nombres: e.target.value })}
-                      className="text-xs h-8"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-700 mb-1">Apellidos *</label>
-                    <Input
-                      required
-                      value={editFormData.apellidos}
-                      onChange={(e) => setEditFormData({ ...editFormData, apellidos: e.target.value })}
-                      className="text-xs h-8"
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <label className="block text-xs font-medium text-slate-700 mb-1">Cédula</label>
-                    <Input
-                      value={editFormData.cedula}
-                      onChange={(e) => setEditFormData({ ...editFormData, cedula: e.target.value })}
-                      className="text-xs h-8"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="col-span-2">
-                    <label className="block text-xs font-medium text-slate-700 mb-1">Razón Social *</label>
-                    <Input
-                      required
-                      value={editFormData.razonSocial}
-                      onChange={(e) => setEditFormData({ ...editFormData, razonSocial: e.target.value })}
-                      className="text-xs h-8"
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <label className="block text-xs font-medium text-slate-700 mb-1">RNC *</label>
-                    <Input
-                      value={editFormData.rnc}
-                      onChange={(e) => setEditFormData({ ...editFormData, rnc: e.target.value })}
-                      className="text-xs h-8"
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Teléfono *</label>
-                  <Input
-                    required
-                    value={editFormData.telefono}
-                    onChange={(e) => setEditFormData({ ...editFormData, telefono: e.target.value })}
-                    className="text-xs h-8"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Email *</label>
-                  <Input
-                    type="email"
-                    required
-                    value={editFormData.email}
-                    onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
-                    className="text-xs h-8"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Dirección</label>
-                <Input
-                  value={editFormData.direccion}
-                  onChange={(e) => setEditFormData({ ...editFormData, direccion: e.target.value })}
-                  className="text-xs h-8"
-                />
-              </div>
-
-              <DialogFooter className="pt-2">
-                <Button type="button" variant="outline" size="sm" onClick={() => setClientToEdit(null)} className="text-xs h-8">
-                  Cancelar
-                </Button>
-                <Button type="submit" size="sm" className="bg-slate-900 hover:bg-slate-800 text-white text-xs h-8">
-                  Guardar Cambios
-                </Button>
-              </DialogFooter>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Diálogo Confirmar Eliminación */}
-      <Dialog open={!!clientToDelete} onOpenChange={() => setClientToDelete(null)}>
+      <Dialog open={!!clientToArchive} onOpenChange={() => setClientToArchive(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <div className="flex items-center gap-2 text-rose-600">
-              <AlertTriangle className="h-5 w-5" />
-              <DialogTitle className="text-base font-bold">Eliminar Cliente</DialogTitle>
-            </div>
-            <DialogDescription className="text-xs text-slate-600 pt-2">
-              ¿Está seguro que desea eliminar al cliente{" "}
-              <strong className="text-slate-900">
-                {clientToDelete?.type === "FISICA"
-                  ? `${clientToDelete.nombres} ${clientToDelete.apellidos}`
-                  : clientToDelete?.razonSocial}
-              </strong>
-              ? Se desvinculará de la base de datos de clientes.
+            <DialogTitle className="text-base font-bold text-slate-900">Archivar cliente</DialogTitle>
+            <DialogDescription className="pt-2 text-xs text-slate-600">
+              <strong className="text-slate-900">{clientToArchive && clientName(clientToArchive)}</strong> dejará de aparecer en la lista y al
+              facturar. Sus comprobantes y cobros se conservan, y puedes restaurarlo desde el filtro de archivados.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setClientToDelete(null)}
-              className="text-xs h-8"
-            >
+            <Button type="button" variant="outline" size="sm" onClick={() => setClientToArchive(null)} className="h-8 text-xs">
               Cancelar
             </Button>
             <Button
               type="button"
               size="sm"
-              onClick={handleDeleteConfirm}
-              className="bg-rose-600 hover:bg-rose-700 text-white text-xs h-8"
+              disabled={pending}
+              onClick={handleArchiveConfirm}
+              className="h-8 bg-rose-600 text-xs text-white hover:bg-rose-700"
             >
-              Eliminar Cliente
+              Archivar cliente
             </Button>
           </DialogFooter>
         </DialogContent>

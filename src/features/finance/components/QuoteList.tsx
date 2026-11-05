@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { useFinanceStore } from "../store/useFinanceStore";
 import { QUOTE_STATUS_LABELS, QuoteStatus, Quote } from "../types";
+import { quoteInvoiceHref } from "../quote-invoice";
+import { isUuid } from "@/features/clients/mapping";
 import { formatMoney, formatDate } from "@/lib/utils";
 import {
   Search,
@@ -34,7 +37,6 @@ export function QuoteList({
     openQuoteCreateModal,
     approveQuote,
     updateQuoteStatus,
-    convertQuoteToInvoice,
     invoices,
     openInvoiceDetail,
   } = useFinanceStore();
@@ -58,17 +60,6 @@ export function QuoteList({
       );
     });
   }, [quotes, clientId, caseId, statusFilter, search]);
-
-  const handleConvert = (quote: Quote) => {
-    try {
-      const inv = convertQuoteToInvoice(quote.id, "B01");
-      toast.success(
-        `Cotización ${quote.number} convertida exitosamente a Factura ${inv.number} (NCF ${inv.ncf})`
-      );
-    } catch (err: any) {
-      toast.error(err.message || "Error al convertir cotización");
-    }
-  };
 
   const handleApprove = (quote: Quote) => {
     approveQuote(quote.id);
@@ -154,7 +145,9 @@ export function QuoteList({
             ) : (
               filteredQuotes.map((quote) => {
                 const statusMeta = QUOTE_STATUS_LABELS[quote.status];
-                const linkedInvoice = quote.convertedInvoiceId
+                const realInvoiceId = isUuid(quote.convertedInvoiceId) ? quote.convertedInvoiceId : null;
+                // Conversiones anteriores: quedaron solo en este navegador, con un NCF sin validez.
+                const localInvoice = quote.convertedInvoiceId
                   ? invoices.find((i) => i.id === quote.convertedInvoiceId)
                   : null;
 
@@ -216,17 +209,41 @@ export function QuoteList({
                     {/* Acciones */}
                     <td className="py-3 px-4 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1.5">
-                        {quote.status === "facturada" && linkedInvoice ? (
+                        {quote.status === "facturada" && realInvoiceId ? (
                           <Button
+                            asChild
                             variant="ghost"
                             size="sm"
-                            onClick={() => openInvoiceDetail(linkedInvoice)}
                             className="text-slate-600 hover:text-slate-900 text-[11px] h-7 px-2"
-                            title="Ver Factura Emitida"
                           >
-                            <ExternalLink className="h-3.5 w-3.5 mr-1 text-slate-500" />
-                            {linkedInvoice.number}
+                            <Link href={`/finanzas/facturas/${realInvoiceId}`} title="Ver la factura">
+                              <ExternalLink className="h-3.5 w-3.5 mr-1 text-slate-500" />
+                              Ver factura
+                            </Link>
                           </Button>
+                        ) : quote.status === "facturada" && localInvoice ? (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openInvoiceDetail(localInvoice)}
+                              className="text-amber-700 hover:text-amber-900 text-[11px] h-7 px-2"
+                              title="Registro guardado en este navegador, sin validez fiscal"
+                            >
+                              <ExternalLink className="h-3.5 w-3.5 mr-1" />
+                              {localInvoice.number}
+                            </Button>
+                            <Button
+                              asChild
+                              size="sm"
+                              className="bg-slate-900 hover:bg-slate-800 text-white text-[11px] h-7 px-2.5 font-medium"
+                            >
+                              <Link href={quoteInvoiceHref(quote)} title="Crear la factura en el módulo de facturación">
+                                <ArrowRight className="h-3.5 w-3.5 mr-1" />
+                                Crear factura real
+                              </Link>
+                            </Button>
+                          </>
                         ) : (
                           <>
                             {quote.status !== "aprobada" && quote.status !== "rechazada" && (
@@ -244,13 +261,14 @@ export function QuoteList({
 
                             {(quote.status === "aprobada" || quote.status === "enviada") && (
                               <Button
+                                asChild
                                 size="sm"
-                                onClick={() => handleConvert(quote)}
                                 className="bg-slate-900 hover:bg-slate-800 text-white text-[11px] h-7 px-2.5 font-medium"
-                                title="Convertir a Factura Comercial con NCF"
                               >
-                                <ArrowRight className="h-3.5 w-3.5 mr-1" />
-                                Convertir a Factura
+                                <Link href={quoteInvoiceHref(quote)} title="Abrir una factura nueva con estos datos">
+                                  <ArrowRight className="h-3.5 w-3.5 mr-1" />
+                                  Convertir a Factura
+                                </Link>
                               </Button>
                             )}
 

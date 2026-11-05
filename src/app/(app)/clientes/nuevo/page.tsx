@@ -1,6 +1,12 @@
+import { BillingGate, NoPermission } from "@/features/billing/components/BillingGate";
 import { ClientForm } from "@/features/clients/components/ClientForm";
+import { getClientsContext } from "@/services/clients/context";
 
-export default function NuevoClientePage() {
+export default async function NuevoClientePage() {
+  const ctx = await getClientsContext();
+  if (ctx.status !== "ready") return <BillingGate status={ctx.status} area="clients" />;
+  if (!ctx.can.create) return <NoPermission what="crear clientes" />;
+
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <div className="mb-6">

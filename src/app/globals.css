@@ -126,3 +126,40 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--ring);
 }
+
+/* Impresión de comprobantes: solo el documento, sin el menú ni las acciones. */
+@media print {
+  /* Fija el margen de la hoja: de él depende la distancia del QR al borde (ver EcfPrintBlock). */
+  @page {
+    margin: 1cm;
+  }
+  /* Hay que sacarlos del flujo, no solo ocultarlos: con el overflow visible de abajo, lo que sigue
+     ocupando ancho hace que Chromium encoja la página, y el QR queda por debajo de los 22 mm. */
+  .billing-no-print {
+    display: none !important;
+  }
+  /* El contenedor de la app tiene altura fija: sin esto una factura larga se corta. */
+  html,
+  body,
+  body .h-screen,
+  main,
+  main * {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  body * {
+    visibility: hidden;
+  }
+  #billing-print-area,
+  #billing-print-area * {
+    visibility: visible;
+  }
+  #billing-print-area {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+  }
+  #billing-print-area table {
+    min-width: 0 !important;
+  }
+}

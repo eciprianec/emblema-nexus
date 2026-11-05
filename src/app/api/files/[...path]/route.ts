@@ -15,6 +15,16 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ path
     const pathArray = p.path || [];
     const filePath = `/${pathArray.join('/')}`;
 
+    // RLS decide: solo se sirve un archivo si el usuario puede ver su registro en documents.
+    const { data: visible } = (await supabase
+      .from('documents' as any)
+      .select('id')
+      .eq('remote_path', filePath)
+      .limit(1)) as any;
+    if (!visible || visible.length === 0) {
+      return new NextResponse('No encontrado', { status: 404 });
+    }
+
     const nextcloud = await getNextcloudService();
     
     // Get file buffer from nextcloud

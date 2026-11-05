@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from 'webdav';
 import https from 'https';
+import { requireAnyPermission } from '@/services/nextcloud/apiGuard';
+import { NEXTCLOUD_NOT_CONFIGURED, getNextcloudEnv, isStoragePath } from '@/services/nextcloud/guards';
 
 const httpsAgent = new https.Agent({
   keepAlive: true,
@@ -30,15 +32,10 @@ function invalidateDirectoryCache(pathPrefix?: string) {
   }
 }
 
-function getWebdavClient(override?: { serverUrl?: string; username?: string; password?: string }) {
-  let baseUrl = (override?.serverUrl || process.env.NEXTCLOUD_URL || 'https://nextcloud.ciberemblema.com').trim();
-  const username = (override?.username || process.env.NEXTCLOUD_USER || 'admin').trim();
-  const password = (override?.password || process.env.NEXTCLOUD_APP_PASSWORD || 'K1mK9nZmYeb9j9oMbZmv').trim();
-
-  if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
-    baseUrl = `https://${baseUrl}`;
-  }
-  baseUrl = baseUrl.replace(/\/$/, '');
+function getWebdavClient() {
+  const nextcloud = getNextcloudEnv();
+  if (!nextcloud) throw new Error(NEXTCLOUD_NOT_CONFIGURED);
+  const { baseUrl, username, password } = nextcloud;
 
   const davUrl = `${baseUrl}/remote.php/dav/files/${username}/`;
   return {
@@ -78,14 +75,22 @@ async function ensureDirectory(client: any, path: string): Promise<void> {
 }
 
 // GET: Descargar archivo o previsualizar
+const PATH_DENIED = 'Ruta no permitida: el almacenamiento se limita a /nexus_storage.';
+
 export async function GET(req: NextRequest) {
   try {
+    const denied = await requireAnyPermission(['documents.view']);
+    if (denied) return denied;
+
     const { searchParams } = new URL(req.url);
     const filePath = searchParams.get('path');
     const isDownload = searchParams.get('download') === 'true';
 
     if (!filePath) {
       return NextResponse.json({ error: 'Ruta de archivo no especificada' }, { status: 400 });
+    }
+    if (!isStoragePath(filePath)) {
+      return NextResponse.json({ error: PATH_DENIED }, { status: 403 });
     }
 
     const { client } = getWebdavClient();
@@ -142,6 +147,12 @@ export async function POST(req: NextRequest) {
       const file = formData.get('file') as File;
       const targetPath = (formData.get('path') as string) || '/nexus_storage';
 
+      const denied = await requireAnyPermission(['documents.upload']);
+      if (denied) return denied;
+      if (!isStoragePath(targetPath)) {
+        return NextResponse.json({ error: PATH_DENIED }, { status: 403 });
+      }
+
       if (!file) {
         return NextResponse.json({ error: 'No se envió ningún archivo' }, { status: 400 });
       }
@@ -151,7 +162,8 @@ export async function POST(req: NextRequest) {
 
       const buffer = Buffer.from(await file.arrayBuffer());
       const cleanTarget = targetPath.replace(/\/$/, '');
-      const filePath = `${cleanTarget}/${file.name}`;
+      // Solo el nombre: un archivo llamado "../../x" no puede salir de la carpeta.
+      const filePath = `${cleanTarget}/${file.name.split(/[\\/]/).pop()}`;
 
       await client.putFileContents(filePath, buffer);
       invalidateDirectoryCache(cleanTarget);
@@ -167,6 +179,19 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const { action } = body;
+
+    const ACTION_PERMISSIONS: Record<string, string> = {
+      list: 'documents.view',
+      create_folder: 'documents.upload',
+      delete: 'documents.delete',
+      sync_all: 'documents.edit',
+    };
+    const denied = await requireAnyPermission([ACTION_PERMISSIONS[action] ?? 'config.manage']);
+    if (denied) return denied;
+    if (typeof body.path === 'string' && !isStoragePath(body.path)) {
+      return NextResponse.json({ success: false, error: PATH_DENIED, items: [] }, { status: 403 });
+    }
+
     const { client, baseUrl } = getWebdavClient();
 
     // 1. Listar contenido de un directorio con caché y sin llamadas redundantes

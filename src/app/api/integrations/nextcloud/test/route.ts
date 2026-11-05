@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server';
 import { createClient } from 'webdav';
+import { requireAnyPermission } from '@/services/nextcloud/apiGuard';
+import { isAllowedServerUrl } from '@/services/nextcloud/guards';
 
 export async function POST(request: Request) {
   try {
+    const denied = await requireAnyPermission(['config.manage']);
+    if (denied) return denied;
+
     const body = await request.json();
     const { url, username, password, remotePath } = body;
 
@@ -17,6 +22,14 @@ export async function POST(request: Request) {
     let fullUrl = url.trim();
     if (!fullUrl.startsWith('http://') && !fullUrl.startsWith('https://')) {
       fullUrl = `https://${fullUrl}`;
+    }
+
+    // Esta ruta se conecta a una dirección indicada por el usuario: no puede apuntar a la red interna.
+    if (!isAllowedServerUrl(fullUrl, process.env.NODE_ENV !== 'production')) {
+      return NextResponse.json(
+        { success: false, error: 'La URL debe ser pública y usar https.' },
+        { status: 400 }
+      );
     }
 
     // Si la URL no termina con la ruta WebDAV típica y no se especificó remotePath

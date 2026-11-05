@@ -151,12 +151,12 @@ export function ECFPrintViewModal() {
                 <div className="space-y-1 text-[10px] text-slate-600">
                   <div className="flex items-center text-emerald-700 font-bold">
                     <CheckCircle className="w-3.5 h-3.5 mr-1" />
-                    e-CF Válido en DGII
+                    Simulación: sin validez fiscal
                   </div>
                   <p>TrackID DGII: <span className="font-mono font-semibold text-slate-900">{activeInvoice.trackIdDgii}</span></p>
                   <p>Cód. Seguridad: <span className="font-mono font-semibold text-slate-900">{activeInvoice.securityCode}</span></p>
                   <p className="text-slate-400 text-[9px] leading-tight mt-1">
-                    Escanee el código QR con su dispositivo para validar la autenticidad fiscal en el portal de la DGII.
+                    Este código QR es de demostración y no valida nada en la DGII.
                   </p>
                 </div>
               </div>

@@ -143,7 +143,7 @@ export function ClientInvoicesView() {
         <div>
           <h3 className="text-base font-bold text-slate-900">Facturación & Comprobantes Fiscales</h3>
           <p className="text-xs text-slate-500">
-            Representaciones oficiales e-CF registradas ante la DGII bajo la Ley 32-23.
+            Demostración: estos comprobantes no tienen validez fiscal.
           </p>
         </div>
 

@@ -4,7 +4,6 @@ export interface NextcloudConfig {
   isConfigured: boolean;
   serverUrl: string;
   username: string;
-  password?: string;
   remotePath: string;
   status: 'disconnected' | 'connected' | 'error';
   lastChecked: string | null;
@@ -19,24 +18,27 @@ interface IntegrationState {
 
 const STORAGE_KEY = 'nexus_integration_nextcloud';
 
-const DEFAULT_PRECONFIG: NextcloudConfig = {
-  isConfigured: true,
-  serverUrl: 'https://nextcloud.ciberemblema.com',
-  username: 'admin',
-  password: 'K1mK9nZmYeb9j9oMbZmv',
-  remotePath: '/remote.php/dav/files/admin/nexus_storage',
-  status: 'connected',
-  lastChecked: '2026-09-29T19:26:24.000Z',
+const NOT_CONFIGURED: NextcloudConfig = {
+  isConfigured: false,
+  serverUrl: '',
+  username: '',
+  remotePath: '',
+  status: 'disconnected',
+  lastChecked: null,
 };
 
 const loadSavedConfig = (): NextcloudConfig => {
   if (typeof window === 'undefined') {
-    return DEFAULT_PRECONFIG;
+    return NOT_CONFIGURED;
   }
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
-      const parsed = JSON.parse(raw);
+      // Las credenciales viven solo en el servidor: borra la contraseña que versiones anteriores guardaban aquí.
+      const { password: _legacyPassword, ...parsed } = JSON.parse(raw);
+      if (_legacyPassword !== undefined) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+      }
       return {
         ...parsed,
         isConfigured: Boolean(parsed.isConfigured !== false && parsed.serverUrl && parsed.username),
@@ -44,7 +46,7 @@ const loadSavedConfig = (): NextcloudConfig => {
       };
     }
   } catch {}
-  return DEFAULT_PRECONFIG;
+  return NOT_CONFIGURED;
 };
 
 export const useIntegrationStore = create<IntegrationState>((set) => ({
@@ -55,7 +57,6 @@ export const useIntegrationStore = create<IntegrationState>((set) => ({
       isConfigured: true,
       serverUrl: config.serverUrl,
       username: config.username,
-      password: config.password,
       remotePath: config.remotePath || '/remote.php/dav/files/' + config.username + '/nexus_storage',
       status: 'connected',
       lastChecked: new Date().toISOString(),
@@ -71,7 +72,6 @@ export const useIntegrationStore = create<IntegrationState>((set) => ({
       isConfigured: false,
       serverUrl: '',
       username: '',
-      password: '',
       remotePath: '',
       status: 'disconnected',
       lastChecked: null,

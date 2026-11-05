@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { createClientAction } from "../actions/client-actions";
+import { clientName } from "../mapping";
 import { clientSchema, ClientFormValues } from "../schemas/client-schema";
-import { useClientStore } from "../store/useClientStore";
 import { Button } from "@/components/ui/button";
 
 export function ClientForm() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { addClient } = useClientStore();
 
   const form = useForm<ClientFormValues>({
     resolver: zodResolver(clientSchema),
@@ -38,47 +38,28 @@ export function ClientForm() {
     setIsSubmitting(true);
     try {
       const isFisica = data.type === "FISICA";
-      const created = addClient({
-        type: data.type,
-        nombres: isFisica ? data.nombres?.trim() : undefined,
-        apellidos: isFisica ? data.apellidos?.trim() : undefined,
-        cedula: isFisica ? data.cedula?.trim() : undefined,
-        pasaporte: isFisica ? data.pasaporte?.trim() : undefined,
-        razonSocial: !isFisica ? data.razonSocial?.trim() : undefined,
-        nombreComercial: !isFisica ? data.nombreComercial?.trim() : undefined,
-        rnc: !isFisica ? data.rnc?.trim() : undefined,
-        representante: !isFisica ? data.representante?.trim() : undefined,
-        telefono: data.telefono.trim(),
-        email: data.email.trim(),
-        direccion: data.direccion.trim(),
-        status: "ACTIVO",
-      });
-
-      const displayName = isFisica
-        ? `${created.nombres || ""} ${created.apellidos || ""}`.trim()
-        : created.razonSocial || "Empresa";
-
-      // Aprovisionar carpetas en Nextcloud WebDAV
-      try {
-        const provRes = await fetch("/api/integrations/nextcloud/provision", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            type: "client",
-            clientId: created.id,
-            clientName: displayName,
-            docNumber: isFisica ? (data.cedula || data.pasaporte) : data.rnc,
-          }),
-        });
-        const provData = await provRes.json();
-        if (provData.success) {
-          toast.success(`Cliente "${displayName}" guardado y carpetas aprovisionadas en Nextcloud.`);
-        } else {
-          toast.success(`Cliente "${displayName}" guardado exitosamente.`);
-        }
-      } catch {
-        toast.success(`Cliente "${displayName}" guardado exitosamente.`);
+      const result = await createClientAction(data);
+      if (!result.success) {
+        toast.error(result.error);
+        return;
       }
+      const created = result.data;
+      const displayName = clientName(created);
+
+      toast.success(`Cliente "${displayName}" guardado exitosamente.`);
+
+      // El cliente ya está guardado: Nextcloud no debe retener la pantalla, o se
+      // reenviaría el formulario y quedaría duplicado.
+      fetch("/api/integrations/nextcloud/provision", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "client",
+          clientId: created.id,
+          clientName: displayName,
+          docNumber: isFisica ? (data.cedula || data.pasaporte) : data.rnc,
+        }),
+      }).catch(console.error);
 
       form.reset();
       router.push("/clientes");

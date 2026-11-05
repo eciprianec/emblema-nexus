@@ -10,7 +10,6 @@ import {
   ClientAgingSummary,
   InvoiceStatus,
   QuoteStatus,
-  NCFType,
   PaymentMethod,
   ExpenseCategory,
   Currency,
@@ -40,9 +39,6 @@ interface FinanceState {
   defaultClientIdForModal?: string;
 
   // Acciones de Facturación
-  createInvoice: (data: Omit<Invoice, 'id' | 'createdAt' | 'balance' | 'paidAmount' | 'subtotal' | 'taxTotal' | 'total'> & {
-    items: Invoice['items'];
-  }) => Invoice;
   updateInvoiceStatus: (id: string, status: InvoiceStatus) => void;
   cancelInvoice: (id: string) => void;
 
@@ -52,7 +48,7 @@ interface FinanceState {
   }) => Quote;
   updateQuoteStatus: (id: string, status: QuoteStatus) => void;
   approveQuote: (id: string) => void;
-  convertQuoteToInvoice: (quoteId: string, ncfType?: NCFType) => Invoice;
+  markQuoteInvoiced: (quoteId: string, invoiceId: string) => void;
 
   // Acciones de Pagos y Cobros
   registerPayment: (paymentData: {
@@ -106,11 +102,9 @@ interface FinanceState {
 }
 
 // Generadores auxiliares de números
-let invoiceSequence = 1;
 let quoteSequence = 1;
 let paymentSequence = 1;
 let expenseSequence = 1;
-let ncfSequence = 1;
 
 const initialInvoices: Invoice[] = [];
 const initialQuotes: Quote[] = [];
@@ -141,42 +135,6 @@ export const useFinanceStore = create<FinanceState>()(
   activePaymentInvoice: null,
   defaultCaseIdForModal: undefined,
   defaultClientIdForModal: undefined,
-
-  createInvoice: (data) => {
-    const subtotal = data.items.reduce((sum, item) => sum + item.total, 0);
-    const taxTotal = data.items.reduce(
-      (sum, item) => (item.appliesTax ? sum + item.total * 0.18 : sum),
-      0
-    );
-    const total = subtotal + taxTotal;
-
-    invoiceSequence += 1;
-    ncfSequence += 1;
-
-    const numStr = String(invoiceSequence).padStart(4, '0');
-    const ncfStr = `${data.ncfType}${String(ncfSequence).padStart(8, '0')}`;
-
-    const newInvoice: Invoice = {
-      ...data,
-      id: `inv-${Date.now()}`,
-      number: data.number || `FAC-2024-${numStr}`,
-      ncf: data.ncf || ncfStr,
-      subtotal,
-      taxTotal,
-      total,
-      paidAmount: 0,
-      balance: total,
-      status: data.status || 'emitida',
-      createdAt: new Date().toISOString(),
-    };
-
-    set((state) => ({
-      invoices: [newInvoice, ...state.invoices],
-      isInvoiceCreateOpen: false,
-    }));
-
-    return newInvoice;
-  },
 
   updateInvoiceStatus: (id, status) => {
     set((state) => ({
@@ -242,50 +200,12 @@ export const useFinanceStore = create<FinanceState>()(
     }));
   },
 
-  convertQuoteToInvoice: (quoteId, ncfType = 'B01') => {
-    const quote = get().quotes.find((q) => q.id === quoteId);
-    if (!quote) throw new Error('Cotización no encontrada');
-
-    invoiceSequence += 1;
-    ncfSequence += 1;
-    const numStr = String(invoiceSequence).padStart(4, '0');
-    const ncfStr = `${ncfType}${String(ncfSequence).padStart(8, '0')}`;
-
-    const newInvoice: Invoice = {
-      id: `inv-${Date.now()}`,
-      number: `FAC-2024-${numStr}`,
-      ncf: ncfStr,
-      ncfType,
-      clientId: quote.clientId,
-      clientName: quote.clientName,
-      clientRncCedula: quote.clientRncCedula,
-      caseId: quote.caseId,
-      caseNumber: quote.caseNumber,
-      caseTitle: quote.caseTitle,
-      issueDate: new Date().toISOString().split('T')[0],
-      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      currency: quote.currency,
-      items: quote.items.map((it) => ({ ...it })),
-      subtotal: quote.subtotal,
-      taxTotal: quote.taxTotal,
-      total: quote.total,
-      paidAmount: 0,
-      balance: quote.total,
-      status: 'emitida',
-      notes: `Generada a partir de cotización ${quote.number}`,
-      createdAt: new Date().toISOString(),
-    };
-
+  markQuoteInvoiced: (quoteId, invoiceId) => {
     set((state) => ({
-      invoices: [newInvoice, ...state.invoices],
       quotes: state.quotes.map((q) =>
-        q.id === quoteId
-          ? { ...q, status: 'facturada', convertedInvoiceId: newInvoice.id }
-          : q
+        q.id === quoteId ? { ...q, status: 'facturada', convertedInvoiceId: invoiceId } : q
       ),
     }));
-
-    return newInvoice;
   },
 
   registerPayment: ({

@@ -21,7 +21,7 @@ export default function EcfMainPage() {
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Gestión, emisión y timbrado oficial de comprobantes fiscales electrónicos en tiempo real ante la DGII.
+            Registros simulados guardados en este navegador. Desde aquí no se emiten comprobantes.
           </p>
         </div>
       </div>
@@ -37,12 +37,9 @@ export default function EcfMainPage() {
         <div className="flex items-center gap-2">
           <Info className="h-4 w-4 text-slate-500 shrink-0" />
           <span>
-            Los comprobantes electrónicos emitidos cuentan con firma digital X.509 avanzada y timbre fiscal verificable mediante código QR y TrackId oficial.
+            Los comprobantes fiscales se crean y se registran en Facturación; esta lista no tiene firma, timbre ni TrackId reales.
           </span>
         </div>
-        <span className="text-[11px] font-mono text-slate-500 hidden md:inline">
-          RNC Emisor: 1-31-98765-4
-        </span>
       </div>
 
       {/* Tabla de Facturas e-CF */}

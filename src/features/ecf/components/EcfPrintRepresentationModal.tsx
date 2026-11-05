@@ -262,11 +262,11 @@ export function EcfPrintRepresentationModal() {
               </p>
               <p>
                 <span className="font-semibold text-slate-600">Estado de Timbrado:</span>{" "}
-                <span className="font-bold text-emerald-700 uppercase">Aceptado por DGII</span>
+                <span className="font-bold text-amber-700 uppercase">Simulación: no enviado a la DGII</span>
               </p>
               <p>
                 <span className="font-semibold text-slate-600">Validez Fiscal:</span>{" "}
-                <span className="text-slate-900">Conforme Ley 32-23 de Facturación Electrónica</span>
+                <span className="text-slate-900">Sin validez fiscal</span>
               </p>
             </div>
           </div>

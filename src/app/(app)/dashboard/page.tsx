@@ -20,7 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCalendarStore } from "@/features/calendar/store/useCalendarStore";
 import { useTaskStore } from "@/features/tasks/store/useTaskStore";
-import { useClientStore } from "@/features/clients/store/useClientStore";
+import { useCompanyClients } from "@/features/clients/hooks/useCompanyClients";
 import { useCaseStore } from "@/features/cases/store/useCaseStore";
 import { EventType } from "@/features/calendar/types";
 import { cn } from "@/lib/utils";
@@ -58,12 +58,11 @@ const EVENT_TYPE_BADGES: Record<
 export default function DashboardPage() {
   const { events } = useCalendarStore();
   const { tasks, moveTaskStatus } = useTaskStore();
-  const { clients } = useClientStore();
+  const { clients, isLoading: isLoadingCounts } = useCompanyClients();
   const { cases } = useCaseStore();
 
   const clientCount = clients.length;
   const caseCount = cases.length;
-  const isLoadingCounts = false;
 
   const todayStr = React.useMemo(() => {
     const now = new Date();

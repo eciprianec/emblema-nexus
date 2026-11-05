@@ -69,9 +69,6 @@ export default function IntegracionesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: "init_base",
-          serverUrl: nextcloud.serverUrl,
-          username: nextcloud.username,
-          password: nextcloud.password,
         }),
       });
       const data = await res.json();
@@ -92,7 +89,7 @@ export default function IntegracionesPage() {
   const handleOpenNextcloudModal = () => {
     setServerUrl(nextcloud.serverUrl || "");
     setUsername(nextcloud.username || "");
-    setPassword(nextcloud.password || "");
+    setPassword("");
     setRemotePath(nextcloud.remotePath || "/remote.php/dav/files/");
     setIsNextcloudModalOpen(true);
   };
@@ -148,7 +145,6 @@ export default function IntegracionesPage() {
     saveNextcloudConfig({
       serverUrl: serverUrl.trim(),
       username: username.trim(),
-      password: password.trim(),
       remotePath: remotePath.trim() || `/remote.php/dav/files/${username.trim()}/nexus_storage`,
     });
     setIsSaving(false);
@@ -268,7 +264,7 @@ export default function IntegracionesPage() {
                       {isInitializingStorage ? "Creando..." : "Inicializar Base"}
                     </Button>
                     <a
-                      href={`${nextcloud.serverUrl || "https://nextcloud.ciberemblema.com"}/index.php/apps/files/?dir=/nexus_storage`}
+                      href={`${nextcloud.serverUrl}/index.php/apps/files/?dir=/nexus_storage`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center justify-center rounded-md text-xs font-medium border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 h-8 px-2.5"
@@ -497,7 +493,8 @@ export default function IntegracionesPage() {
                   </button>
                 </div>
                 <p className="text-[10px] text-slate-500 mt-1">
-                  Se recomienda usar una <em>App Password</em> generada en Configuración &gt; Seguridad en Nextcloud.
+                  Solo se usa para probar la conexión y no se guarda. La aplicación se conecta con las variables de
+                  servidor <code>NEXTCLOUD_URL</code>, <code>NEXTCLOUD_USER</code> y <code>NEXTCLOUD_APP_PASSWORD</code>.
                 </p>
               </div>
 

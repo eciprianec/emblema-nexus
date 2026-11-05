@@ -1,7 +1,7 @@
 import "server-only";
 
 import * as crypto from "node:crypto";
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
@@ -163,8 +163,11 @@ export class EcfSigner {
     certificateData?: string | null,
     password?: string | null
   ): ParsedCertificate {
-    // Si no hay certificado provisto, generar o utilizar clave de desarrollo segura en memoria
     if (!certificateData || certificateData.trim().length === 0) {
+      // Un comprobante firmado con una clave de desarrollo no es válido: en producción debe fallar.
+      if (process.env.NODE_ENV === "production") {
+        throw new Error("No hay certificado digital configurado para firmar el e-CF.");
+      }
       return this.getDevCertificate();
     }
 
@@ -191,21 +194,15 @@ export class EcfSigner {
       }
     }
 
-    // 2. Caso PKCS#12 / .pfx en Base64 o binario
-    try {
-      const p12Buffer = Buffer.from(trimmed, "base64");
-      return this.extractFromP12Buffer(p12Buffer, password || "");
-    } catch {
-      // Si falla la extracción PKCS#12, usar certificado de contingencia para no romper el entorno
-      return this.getDevCertificate();
-    }
+    // 2. Caso PKCS#12 / .pfx en Base64
+    return this.extractFromP12Buffer(Buffer.from(trimmed, "base64"), password || "");
   }
 
   /**
-   * Extrae claves de un archivo PKCS#12 utilizando OpenSSL si está disponible en el sistema.
+   * Extrae claves de un archivo PKCS#12 con OpenSSL. Se invoca sin shell y la contraseña
+   * viaja por variable de entorno: nunca forma parte de un comando.
    */
   private static extractFromP12Buffer(buffer: Buffer, password: string): ParsedCertificate {
-    // Buscar OpenSSL ejecutable
     const opensslPaths = [
       "openssl",
       "C:\\Program Files\\Git\\usr\\bin\\openssl.exe",
@@ -215,7 +212,7 @@ export class EcfSigner {
     let opensslBin: string | null = null;
     for (const bin of opensslPaths) {
       try {
-        execSync(`"${bin}" version`, { stdio: "ignore" });
+        execFileSync(bin, ["version"], { stdio: "ignore" });
         opensslBin = bin;
         break;
       } catch {
@@ -224,24 +221,29 @@ export class EcfSigner {
     }
 
     if (!opensslBin) {
-      return this.getDevCertificate();
+      throw new Error("OpenSSL no está disponible para leer el certificado PKCS#12.");
     }
 
-    const tempDir = os.tmpdir();
-    const tempP12Path = path.join(tempDir, `ecf_cert_${Date.now()}_${Math.random().toString(36).substring(7)}.p12`);
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ecf-cert-"));
+    const tempP12Path = path.join(tempDir, "cert.p12");
+    const run = (args: string[]) =>
+      execFileSync(opensslBin as string, ["pkcs12", "-in", tempP12Path, ...args, "-passin", "env:ECF_P12_PASSWORD"], {
+        encoding: "utf8",
+        stdio: ["pipe", "pipe", "ignore"],
+        env: { ...process.env, ECF_P12_PASSWORD: password },
+      });
 
     try {
-      fs.writeFileSync(tempP12Path, buffer);
+      fs.writeFileSync(tempP12Path, buffer, { mode: 0o600 });
 
-      const passParam = password ? `-passin "pass:${password}"` : `-passin "pass:"`;
-
-      // Extraer clave privada sin cifrado
-      const keyCommand = `"${opensslBin}" pkcs12 -in "${tempP12Path}" -nocerts -nodes ${passParam}`;
-      const privateKeyPem = execSync(keyCommand, { encoding: "utf8", stdio: ["pipe", "pipe", "ignore"] });
-
-      // Extraer certificado cliente
-      const certCommand = `"${opensslBin}" pkcs12 -in "${tempP12Path}" -clcerts -nokeys ${passParam}`;
-      const certificatePem = execSync(certCommand, { encoding: "utf8", stdio: ["pipe", "pipe", "ignore"] });
+      let privateKeyPem: string;
+      let certificatePem: string;
+      try {
+        privateKeyPem = run(["-nocerts", "-nodes"]);
+        certificatePem = run(["-clcerts", "-nokeys"]);
+      } catch {
+        throw new Error("No se pudo abrir el certificado: el archivo o la contraseña no son válidos.");
+      }
 
       const certMatch = certificatePem.match(/-----BEGIN CERTIFICATE-----[\s\S]+?-----END CERTIFICATE-----/);
       if (!certMatch) {
@@ -259,13 +261,7 @@ export class EcfSigner {
         certificateBase64: cleanCertBase64,
       };
     } finally {
-      if (fs.existsSync(tempP12Path)) {
-        try {
-          fs.unlinkSync(tempP12Path);
-        } catch {
-          // Ignorar error de limpieza temporal
-        }
-      }
+      fs.rmSync(tempDir, { recursive: true, force: true });
     }
   }
 

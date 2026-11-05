@@ -16,6 +16,9 @@ export default function PortalLayout({
 }) {
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans antialiased selection:bg-slate-900 selection:text-white">
+      <div role="alert" className="border-b border-amber-300 bg-amber-50 px-4 py-2 text-center text-xs text-amber-900">
+        <strong>Demostración sin validez fiscal.</strong> Este portal solo guarda datos en este navegador y no envía nada a la DGII.
+      </div>
       <PortalHeader />
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         {children}

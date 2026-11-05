@@ -386,7 +386,8 @@ export class EcfService implements IEcfService {
     // 1. Obtener registro de ecf_invoices
     const { data: ecfInvoice, error: fetchError } = await db
       .from("ecf_invoices")
-      .select("*")
+      // Sin "*": lo enviado al proveedor no es legible con la sesión del usuario (00024).
+      .select("id, company_id, invoice_id, encf, ecf_type, environment, security_code, sign_date, xml_unsigned, xml_signed, track_id, dgii_status, dgii_status_code, dgii_messages, qr_code_url, buyer_acceptance_status, buyer_acceptance_date, buyer_rejection_reason, created_by, created_at, updated_at")
       .eq("id", ecfInvoiceId)
       .eq("company_id", companyId)
       .single();

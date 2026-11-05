@@ -267,7 +267,7 @@ LEFT JOIN (
         COUNT(*) FILTER (WHERE status = 'completado' AND due_date IS NOT NULL AND completed_at > due_date) AS tasks_late,
         COUNT(*) FILTER (WHERE status NOT IN ('completado', 'cancelado') AND due_date IS NOT NULL AND due_date < now()) AS tasks_overdue_pending,
         COUNT(*) FILTER (
-            (status NOT IN ('completado', 'cancelado') AND due_date IS NOT NULL AND due_date < now()) OR
+            WHERE (status NOT IN ('completado', 'cancelado') AND due_date IS NOT NULL AND due_date < now()) OR
             (status = 'completado' AND due_date IS NOT NULL AND completed_at > due_date)
         ) AS total_overdue
     FROM tasks

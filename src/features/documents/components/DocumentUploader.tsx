@@ -72,7 +72,7 @@ export function DocumentUploader({ caseId, clientId, requirementId, onUploadSucc
       setFile(null);
       setDocumentName('');
       setCategory('');
-      toast.success('Documento subido exitosamente.');
+      toast.info('Simulación: el documento no se guardó.');
       if (onUploadSuccess) onUploadSuccess();
     }, 2000);
   };

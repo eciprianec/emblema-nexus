@@ -37,7 +37,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { useClientStore } from "@/features/clients/store/useClientStore";
+import { useCompanyClients } from "@/features/clients/hooks/useCompanyClients";
 import { useCaseStore } from "@/features/cases/store/useCaseStore";
 
 interface ExplorerItem {
@@ -57,7 +57,7 @@ interface CacheRecord {
 }
 
 export function NextcloudFileExplorer() {
-  const { clients } = useClientStore();
+  const { clients } = useCompanyClients();
   const { cases } = useCaseStore();
 
   const [currentPath, setCurrentPath] = useState<string>("/nexus_storage");

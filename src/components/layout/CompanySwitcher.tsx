@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { Building2, Check, ChevronsUpDown } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,42 +19,31 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { setActiveCompanyAction } from "@/features/billing/actions/billing-actions";
 
-const companies = [
-  {
-    value: "emblema-principal",
-    label: "Emblema Nexus / Oficina Principal",
-  },
-  {
-    value: "emblema-norte",
-    label: "Emblema Nexus / Zona Norte",
-  },
-  {
-    value: "emblema-este",
-    label: "Emblema Nexus / Zona Este",
-  },
-];
-
-export function CompanySwitcher() {
+/** Muestra y cambia la misma empresa activa con la que se factura. */
+export function CompanySwitcher({
+  companies,
+  activeCompanyId,
+}: {
+  companies: { id: string; name: string }[];
+  activeCompanyId: string | null;
+}) {
+  const router = useRouter();
   const [open, setOpen] = React.useState(false);
-  const [activeCompany, setActiveCompany] = React.useState(companies[0].value);
+  const [pending, startTransition] = React.useTransition();
 
-  React.useEffect(() => {
-    const saved = localStorage.getItem("activeCompany");
-    if (saved) {
-      setActiveCompany(saved);
-    }
-  }, []);
-
-  const handleSelect = (currentValue: string) => {
-    setActiveCompany(currentValue);
-    localStorage.setItem("activeCompany", currentValue);
+  const handleSelect = (companyId: string) => {
     setOpen(false);
-    // Idealmente recargar o limpiar contexto de datos
-    // window.location.reload();
+    if (companyId === activeCompanyId) return;
+    startTransition(async () => {
+      const result = await setActiveCompanyAction(companyId);
+      if (result.success) router.refresh();
+      else toast.error(result.error);
+    });
   };
 
-  const selectedCompany = companies.find((c) => c.value === activeCompany);
+  const selectedCompany = companies.find((c) => c.id === activeCompanyId);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -61,12 +52,13 @@ export function CompanySwitcher() {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[280px] justify-between border-slate-200 bg-white hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:hover:bg-slate-900"
+          disabled={pending || companies.length === 0}
+          className="w-[280px] min-w-0 shrink justify-between border-slate-200 bg-white hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:hover:bg-slate-900"
         >
-          <div className="flex items-center gap-2 truncate">
-            <Building2 className="h-4 w-4 text-slate-500" />
+          <div className="flex min-w-0 items-center gap-2">
+            <Building2 className="h-4 w-4 shrink-0 text-slate-500" />
             <span className="truncate text-sm font-medium text-slate-700 dark:text-slate-300">
-              {selectedCompany?.label || "Seleccionar empresa..."}
+              {selectedCompany?.name ?? "Sin empresa asignada"}
             </span>
           </div>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -80,17 +72,17 @@ export function CompanySwitcher() {
             <CommandGroup>
               {companies.map((company) => (
                 <CommandItem
-                  key={company.value}
-                  value={company.value}
-                  onSelect={handleSelect}
+                  key={company.id}
+                  value={company.name}
+                  onSelect={() => handleSelect(company.id)}
                 >
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      activeCompany === company.value ? "opacity-100" : "opacity-0"
+                      activeCompanyId === company.id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {company.label}
+                  {company.name}
                 </CommandItem>
               ))}
             </CommandGroup>
