@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from 'webdav';
+import { requireAnyPermission } from '@/services/nextcloud/apiGuard';
+import { NEXTCLOUD_NOT_CONFIGURED, getNextcloudEnv } from '@/services/nextcloud/guards';
 
 interface ProvisionRequestBody {
   type: 'client' | 'case' | 'init_base';
@@ -10,9 +12,6 @@ interface ProvisionRequestBody {
   caseNumber?: string;
   title?: string;
   area?: string;
-  serverUrl?: string;
-  username?: string;
-  password?: string;
 }
 
 async function ensureDirectory(client: any, path: string): Promise<void> {
@@ -44,15 +43,16 @@ export async function POST(request: Request) {
     const body: ProvisionRequestBody = await request.json();
     const { type } = body;
 
-    // Resolve credentials (request body override or environment variables)
-    let baseUrl = (body.serverUrl || process.env.NEXTCLOUD_URL || 'https://nextcloud.ciberemblema.com').trim();
-    const username = (body.username || process.env.NEXTCLOUD_USER || 'admin').trim();
-    const password = (body.password || process.env.NEXTCLOUD_APP_PASSWORD || 'K1mK9nZmYeb9j9oMbZmv').trim();
+    const denied = await requireAnyPermission(
+      type === 'init_base' ? ['config.manage'] : ['documents.upload', 'clients.create', 'cases.create']
+    );
+    if (denied) return denied;
 
-    if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
-      baseUrl = `https://${baseUrl}`;
+    const nextcloud = getNextcloudEnv();
+    if (!nextcloud) {
+      return NextResponse.json({ success: false, error: NEXTCLOUD_NOT_CONFIGURED }, { status: 503 });
     }
-    baseUrl = baseUrl.replace(/\/$/, '');
+    const { baseUrl, username, password } = nextcloud;
 
     const davUrl = `${baseUrl}/remote.php/dav/files/${username}/`;
     const client = createClient(davUrl, {

@@ -36,10 +36,18 @@ const navItems = [
 
 export function EcfNav() {
   const pathname = usePathname();
-  const { openEmitModal, config } = useEcfStore();
+  const { config } = useEcfStore();
 
   return (
     <div className="border-b border-slate-200 bg-white sticky top-0 z-10 pb-1 pt-1 -mt-2 mb-6">
+      <div role="alert" className="mt-1 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+        <strong>Simulación sin validez fiscal.</strong> Esta sección solo guarda datos en este navegador y no envía nada
+        a la DGII, aunque muestre estados como &quot;aceptado&quot;. Para facturar usa{" "}
+        <Link href="/finanzas/facturas" className="font-medium underline">
+          Facturación
+        </Link>
+        .
+      </div>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-2">
         {/* Subnavigation Tabs */}
         <div className="flex items-center space-x-1 overflow-x-auto no-scrollbar scroll-smooth">
@@ -85,12 +93,14 @@ export function EcfNav() {
           </Badge>
 
           <Button
+            asChild
             size="sm"
-            onClick={() => openEmitModal()}
             className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium h-8 shadow-xs"
           >
-            <Plus className="h-3.5 w-3.5 mr-1.5" />
-            Emitir e-CF
+            <Link href="/finanzas/facturas/nueva">
+              <Plus className="h-3.5 w-3.5 mr-1.5" />
+              Nueva factura
+            </Link>
           </Button>
         </div>
       </div>

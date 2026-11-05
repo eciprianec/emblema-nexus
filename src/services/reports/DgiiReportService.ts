@@ -257,7 +257,9 @@ export class DgiiReportService {
       .eq("company_id", companyId)
       .gte("issue_date", startDate)
       .lte("issue_date", endDate)
-      .not("status", "in", '("borrador","anulada")')
+      .not("status", "in", '("borrador","anulada","en_proceso")')
+      // Un e-CF de pruebas no tiene validez fiscal: no se reporta.
+      .or("dgii_environment.is.null,dgii_environment.eq.prod")
       .order("issue_date", { ascending: true });
 
     if (invError) {

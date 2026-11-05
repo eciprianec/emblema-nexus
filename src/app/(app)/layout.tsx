@@ -1,47 +1,44 @@
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import Sidebar from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
+import { getTenantContext } from '@/services/tenant/context';
 
 export default async function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const isAdminSession = cookieStore.get('nexus_admin_session')?.value === 'true';
-
-  let session = null;
+  // getUser valida el token con Supabase; getSession solo lee la cookie sin verificarla.
+  let authUser = null;
   try {
     const supabase = await createClient();
-    const res = await supabase.auth.getSession();
-    session = res.data.session;
+    const { data } = await supabase.auth.getUser();
+    authUser = data.user;
   } catch {
-    session = null;
+    authUser = null;
   }
 
-  if (!session && !isAdminSession) {
+  if (!authUser) {
     redirect('/login');
   }
 
-  const user = session
-    ? {
-        firstName: session.user.user_metadata?.first_name || 'Administrador',
-        lastName: session.user.user_metadata?.last_name || 'Nexus',
-        email: session.user.email || 'admin@emblemanexus.com',
-      }
-    : {
-        firstName: 'Administrador',
-        lastName: 'Nexus',
-        email: 'admin@emblemanexus.com',
-      };
+  const user = {
+    firstName: authUser.user_metadata?.first_name || 'Usuario',
+    lastName: authUser.user_metadata?.last_name || '',
+    email: authUser.email || '',
+  };
+
+  const tenant = await getTenantContext();
+  const companies = tenant.status === 'ready' ? tenant.companies : [];
+  const activeCompanyId = tenant.status === 'ready' ? tenant.companyId : null;
 
   return (
     <div className="flex h-screen w-full bg-slate-50">
       <Sidebar user={user} />
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
-        <Header user={user} />
+      {/* clip y no hidden: un foco o una validación no pueden desplazar el contenido bajo el menú. */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-clip bg-white">
+        <Header user={user} companies={companies} activeCompanyId={activeCompanyId} />
         <div className="flex-1 overflow-auto p-6">
           {children}
         </div>

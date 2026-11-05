@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
   KeyRound,
@@ -13,95 +13,37 @@ import {
   FolderKanban,
   Plus,
   Edit2,
-  Trash2,
-  AlertTriangle,
 } from "lucide-react";
-import { toast } from "sonner";
-import { useClientStore } from "../store/useClientStore";
 import { useCaseStore } from "@/features/cases/store/useCaseStore";
 import { DocumentList } from "@/features/documents/components/DocumentList";
 import { DocumentUploader } from "@/features/documents/components/DocumentUploader";
 import { NextcloudVaultCard } from "@/features/documents/components/NextcloudVaultCard";
-import { ClientFinanceTab } from "@/features/finance/components/ClientFinanceTab";
-import { FinanceModals } from "@/features/finance/components/FinanceModals";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useClientPortalStore } from "@/features/client-portal/store/useClientPortalStore";
 import { ClientPortalAccessModal } from "@/features/client-portal/components/ClientPortalAccessModal";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { clientName } from "../mapping";
+import type { Client } from "../types";
+import { ClientEditDialog } from "./ClientEditDialog";
 
-export function ClientDetail({ clientId }: { clientId: string }) {
+export function ClientDetail({
+  client,
+  canEdit,
+  financeTab,
+}: {
+  client: Client;
+  canEdit: boolean;
+  financeTab: ReactNode;
+}) {
+  const clientId = client.id;
   const [activeTab, setActiveTab] = useState("info");
   const { openAccessModal } = useClientPortalStore();
-  const { getClientById, updateClient } = useClientStore();
   const { getCasesByClientId } = useCaseStore();
 
-  const client = getClientById(clientId);
   const clientCases = getCasesByClientId(clientId);
-
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [editFormData, setEditFormData] = useState({
-    nombres: "",
-    apellidos: "",
-    razonSocial: "",
-    cedula: "",
-    rnc: "",
-    telefono: "",
-    email: "",
-    direccion: "",
-  });
-
-  const handleOpenEdit = () => {
-    if (!client) return;
-    setEditFormData({
-      nombres: client.nombres || "",
-      apellidos: client.apellidos || "",
-      razonSocial: client.razonSocial || "",
-      cedula: client.cedula || "",
-      rnc: client.rnc || "",
-      telefono: client.telefono || "",
-      email: client.email || "",
-      direccion: client.direccion || "",
-    });
-    setIsEditOpen(true);
-  };
-
-  const handleEditSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!client) return;
-    updateClient(client.id, editFormData);
-    toast.success("Información del cliente actualizada.");
-    setIsEditOpen(false);
-  };
-
-  if (!client) {
-    return (
-      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-8 text-center mt-6">
-        <UserIcon className="h-12 w-12 text-slate-300 mx-auto mb-3" />
-        <h3 className="text-base font-semibold text-slate-900">Cliente no encontrado</h3>
-        <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-          No se encontró el registro de cliente con identificador <code>{clientId}</code>.
-        </p>
-        <Link href="/clientes" className="mt-4 inline-block">
-          <Button size="sm" className="bg-slate-900 hover:bg-slate-800 text-white text-xs">
-            ← Volver a Directorio de Clientes
-          </Button>
-        </Link>
-      </div>
-    );
-  }
 
   const isFisica = client.type === "FISICA";
-  const displayName = isFisica
-    ? `${client.nombres || ""} ${client.apellidos || ""}`.trim()
-    : client.razonSocial || "Empresa";
+  const displayName = clientName(client);
   const docLabel = isFisica ? "Cédula de Identidad" : "RNC (Registro Tributario)";
   const docValue = isFisica ? client.cedula || client.pasaporte || "N/A" : client.rnc || "N/A";
 
@@ -131,15 +73,17 @@ export function ClientDetail({ clientId }: { clientId: string }) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleOpenEdit}
-            className="text-xs h-7 border-slate-300"
-          >
-            <Edit2 className="w-3.5 h-3.5 mr-1" />
-            Editar Datos
-          </Button>
+          {canEdit && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setIsEditOpen(true)}
+              className="text-xs h-7 border-slate-300"
+            >
+              <Edit2 className="w-3.5 h-3.5 mr-1" />
+              Editar Datos
+            </Button>
+          )}
 
           <Button
             size="sm"
@@ -182,8 +126,14 @@ export function ClientDetail({ clientId }: { clientId: string }) {
                   Registrado el {new Date(client.createdAt).toLocaleDateString("es-DO", { dateStyle: "long" })}
                 </p>
               </div>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                {client.status || "Activo"}
+              <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                  client.status === "ACTIVO"
+                    ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+                    : "bg-slate-100 text-slate-700 border-slate-200"
+                }`}
+              >
+                {client.status === "ACTIVO" ? "Activo" : "Archivado"}
               </span>
             </div>
 
@@ -218,14 +168,14 @@ export function ClientDetail({ clientId }: { clientId: string }) {
                   <Mail className="h-4 w-4 text-slate-400 shrink-0" />
                   <div>
                     <span className="text-slate-500 block text-[11px]">Correo Electrónico:</span>
-                    <span className="font-medium text-slate-900">{client.email}</span>
+                    <span className="font-medium text-slate-900">{client.email || "No especificado"}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Phone className="h-4 w-4 text-slate-400 shrink-0" />
                   <div>
                     <span className="text-slate-500 block text-[11px]">Teléfono:</span>
-                    <span className="font-medium text-slate-900">{client.telefono}</span>
+                    <span className="font-medium text-slate-900">{client.telefono || "No especificado"}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -334,115 +284,10 @@ export function ClientDetail({ clientId }: { clientId: string }) {
         )}
 
         {/* PESTAÑA: FINANZAS */}
-        {activeTab === "finanzas" && <ClientFinanceTab clientId={clientId} />}
+        {activeTab === "finanzas" && financeTab}
       </div>
 
-      {/* Modal Editar Cliente */}
-      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900">Editar Datos del Cliente</DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
-              Modifique la información de contacto y fiscal del cliente.
-            </DialogDescription>
-          </DialogHeader>
-
-          <form onSubmit={handleEditSubmit} className="space-y-4 pt-2">
-            {isFisica ? (
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Nombres *</label>
-                  <Input
-                    required
-                    value={editFormData.nombres}
-                    onChange={(e) => setEditFormData({ ...editFormData, nombres: e.target.value })}
-                    className="text-xs h-8"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Apellidos *</label>
-                  <Input
-                    required
-                    value={editFormData.apellidos}
-                    onChange={(e) => setEditFormData({ ...editFormData, apellidos: e.target.value })}
-                    className="text-xs h-8"
-                  />
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Cédula</label>
-                  <Input
-                    value={editFormData.cedula}
-                    onChange={(e) => setEditFormData({ ...editFormData, cedula: e.target.value })}
-                    className="text-xs h-8"
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2">
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Razón Social *</label>
-                  <Input
-                    required
-                    value={editFormData.razonSocial}
-                    onChange={(e) => setEditFormData({ ...editFormData, razonSocial: e.target.value })}
-                    className="text-xs h-8"
-                  />
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-xs font-medium text-slate-700 mb-1">RNC *</label>
-                  <Input
-                    value={editFormData.rnc}
-                    onChange={(e) => setEditFormData({ ...editFormData, rnc: e.target.value })}
-                    className="text-xs h-8"
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Teléfono *</label>
-                <Input
-                  required
-                  value={editFormData.telefono}
-                  onChange={(e) => setEditFormData({ ...editFormData, telefono: e.target.value })}
-                  className="text-xs h-8"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Email *</label>
-                <Input
-                  type="email"
-                  required
-                  value={editFormData.email}
-                  onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
-                  className="text-xs h-8"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1">Dirección</label>
-              <Input
-                value={editFormData.direccion}
-                onChange={(e) => setEditFormData({ ...editFormData, direccion: e.target.value })}
-                className="text-xs h-8"
-              />
-            </div>
-
-            <DialogFooter className="pt-2">
-              <Button type="button" variant="outline" size="sm" onClick={() => setIsEditOpen(false)} className="text-xs h-8">
-                Cancelar
-              </Button>
-              <Button type="submit" size="sm" className="bg-slate-900 hover:bg-slate-800 text-white text-xs h-8">
-                Guardar Cambios
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      <FinanceModals />
+      {isEditOpen && <ClientEditDialog client={client} onClose={() => setIsEditOpen(false)} />}
       <ClientPortalAccessModal />
     </div>
   );

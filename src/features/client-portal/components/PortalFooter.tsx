@@ -110,7 +110,7 @@ export function PortalFooter() {
                 Toda la información documental y técnica está protegida por el Secreto Profesional de la Abogacía (Ley 91) y la Ley 172-13 sobre Protección de Datos Personales.
               </p>
               <div className="text-[10px] text-slate-400 pt-1 border-t border-slate-800">
-                RNC: 1-32-45892-1 • Emisor e-CF Autorizado por DGII
+                Demostración: sin validez fiscal
               </div>
             </div>
           </div>

@@ -57,7 +57,6 @@ export default function Sidebar({ user }: SidebarProps) {
   const router = useRouter();
 
   const handleLogout = async () => {
-    document.cookie = "nexus_admin_session=; path=/; max-age=0";
     try {
       const supabase = createClient();
       await supabase.auth.signOut();
@@ -71,7 +70,7 @@ export default function Sidebar({ user }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "relative flex flex-col bg-slate-950 text-slate-300 transition-all duration-300 z-20",
+        "relative flex shrink-0 flex-col bg-slate-950 text-slate-300 transition-all duration-300 z-20 print:hidden",
         isCollapsed ? "w-16" : "w-[280px]"
       )}
     >

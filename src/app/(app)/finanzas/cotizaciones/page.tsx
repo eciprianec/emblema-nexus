@@ -73,7 +73,7 @@ export default function CotizacionesPage() {
             {invoicedQuotes}
           </div>
           <div className="text-xs text-purple-600 mt-1">
-            Con NCF asignado
+            Con factura creada
           </div>
         </div>
 

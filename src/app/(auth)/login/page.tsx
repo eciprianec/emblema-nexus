@@ -32,14 +32,6 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
-      if (data.email.toLowerCase() === 'admin@emblemanexus.com' && data.password === 'admin123456') {
-        document.cookie = "nexus_admin_session=true; path=/; max-age=86400; SameSite=Lax";
-        toast.success('Sesión iniciada correctamente como Administrador');
-        router.push('/dashboard');
-        router.refresh();
-        return;
-      }
-
       const supabase = createClient();
       const { error } = await supabase.auth.signInWithPassword({
         email: data.email,
@@ -69,7 +61,8 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      {/* method="post": si se envía antes de cargar el JavaScript, la contraseña no acaba en la URL ni en los logs. */}
+      <form method="post" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
           <label className="text-sm font-medium text-slate-900" htmlFor="email">
             Correo electrónico

@@ -46,8 +46,7 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  const hasAdminSession = request.cookies.get("nexus_admin_session")?.value === "true";
-  const isAuthenticated = Boolean(user || hasAdminSession);
+  const isAuthenticated = Boolean(user);
 
   // Rutas del portal de clientes y consultas públicas (tienen su propia autenticación/acceso)
   if (request.nextUrl.pathname.startsWith("/portal")) {

@@ -14,7 +14,7 @@ export function Breadcrumbs() {
   const segments = pathname.split("/").filter(Boolean);
 
   return (
-    <nav aria-label="Breadcrumb" className="flex items-center space-x-1 text-sm text-slate-500 dark:text-slate-400">
+    <nav aria-label="Breadcrumb" className="flex min-w-0 items-center space-x-1 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
       <Link
         href="/"
         className="flex items-center transition-colors hover:text-slate-900 dark:hover:text-slate-50"
@@ -26,7 +26,8 @@ export function Breadcrumbs() {
       {segments.map((segment, index) => {
         const isLast = index === segments.length - 1;
         const href = `/${segments.slice(0, index + 1).join("/")}`;
-        const title = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " ");
+        const isId = /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(segment);
+        const title = isId ? "Detalle" : segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " ");
 
         return (
           <div key={href} className="flex items-center space-x-1">

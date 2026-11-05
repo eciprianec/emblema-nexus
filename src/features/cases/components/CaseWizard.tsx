@@ -19,7 +19,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCaseStore } from "../store/useCaseStore";
-import { useClientStore } from "@/features/clients/store/useClientStore";
+import { createQuickClientAction } from "@/features/clients/actions/client-actions";
+import { useCompanyClients } from "@/features/clients/hooks/useCompanyClients";
 import { useUserStore } from "@/features/users/store/useUserStore";
 import { CaseArea, CasePriority } from "../types";
 
@@ -53,7 +54,7 @@ export function CaseWizard() {
   const preselectedClientId = searchParams.get("clientId");
 
   const { addCase } = useCaseStore();
-  const { clients, addClient } = useClientStore();
+  const { clients, isLoading: isLoadingClients, error: clientsError, addClient } = useCompanyClients();
   const { users } = useUserStore();
 
   const [step, setStep] = React.useState(1);
@@ -100,23 +101,26 @@ export function CaseWizard() {
   const selectedClient = clients.find((c) => c.id === clienteId);
   const selectedUser = users.find((u) => u.id === responsableId);
 
-  const handleQuickClientCreate = (e: React.FormEvent) => {
+  const handleQuickClientCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!quickClientName.trim() || !quickClientEmail.trim()) {
       toast.error("Por favor complete al menos el nombre y correo del cliente.");
       return;
     }
 
-    const created = addClient({
+    const result = await createQuickClientAction({
       type: "FISICA",
       nombres: quickClientName.trim(),
-      apellidos: "",
       cedula: quickClientDoc.trim(),
-      telefono: quickClientPhone.trim() || "809-000-0000",
+      telefono: quickClientPhone.trim(),
       email: quickClientEmail.trim(),
-      direccion: "Santo Domingo, R.D.",
-      status: "ACTIVO",
     });
+    if (!result.success) {
+      toast.error(result.error);
+      return;
+    }
+    const created = result.data;
+    addClient(created);
 
     // Aprovisionar carpetas de cliente en Nextcloud WebDAV
     fetch("/api/integrations/nextcloud/provision", {
@@ -391,11 +395,13 @@ export function CaseWizard() {
             </Button>
           </div>
 
-          {clients.length === 0 ? (
+          {isLoadingClients ? (
+            <p className="p-6 text-center text-xs text-slate-500">Cargando clientes...</p>
+          ) : clients.length === 0 ? (
             <div className="p-6 rounded-lg border border-dashed border-amber-300 bg-amber-50/50 text-center">
               <AlertCircle className="h-8 w-8 text-amber-600 mx-auto mb-2" />
               <p className="text-xs font-semibold text-amber-900">
-                No hay clientes registrados en la base de datos
+                {clientsError ?? "No hay clientes registrados en la base de datos"}
               </p>
               <p className="text-[11px] text-amber-700 mt-1 max-w-md mx-auto">
                 Para aperturar un expediente debe existir al menos un cliente. Puede registrar uno ahora mismo.

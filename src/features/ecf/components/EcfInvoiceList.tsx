@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { useEcfStore } from "../store/useEcfStore";
 import { ECFType, ECFStatus, ECF_STATUS_MAP, ECF_TYPE_MAP, IssuedECF } from "../types";
 import { formatMoney, formatDate } from "@/lib/utils";
@@ -12,7 +13,6 @@ import {
   AlertTriangle,
   Copy,
   ExternalLink,
-  Plus,
   FileCode,
   FileText,
   Filter,
@@ -26,7 +26,6 @@ export function EcfInvoiceList() {
     issuedEcfs,
     openPrintModal,
     openTrackIdModal,
-    openEmitModal,
   } = useEcfStore();
 
   const [search, setSearch] = useState("");
@@ -99,12 +98,14 @@ export function EcfInvoiceList() {
 
         <div className="flex items-center gap-2 shrink-0">
           <Button
+            asChild
             size="sm"
-            onClick={() => openEmitModal()}
             className="bg-slate-900 hover:bg-slate-800 text-white text-xs h-8 font-medium shadow-xs"
           >
-            <Plus className="h-3.5 w-3.5 mr-1" />
-            Emitir Nuevo e-CF
+            <Link href="/finanzas/facturas">
+              <ExternalLink className="h-3.5 w-3.5 mr-1" />
+              Ir a Facturación
+            </Link>
           </Button>
         </div>
       </div>
@@ -132,7 +133,7 @@ export function EcfInvoiceList() {
                     <FileText className="h-8 w-8 text-slate-300" />
                     <p className="text-sm font-medium">No se encontraron comprobantes electrónicos</p>
                     <p className="text-xs text-slate-400">
-                      Modifique los filtros o emita un nuevo comprobante con valor fiscal ante la DGII.
+                      Aquí solo aparecen registros simulados guardados en este navegador. Las facturas se crean en Facturación.
                     </p>
                   </div>
                 </td>
@@ -271,10 +272,10 @@ export function EcfInvoiceList() {
       <div className="p-3 border-t border-slate-200 bg-slate-50/50 flex items-center justify-between text-xs text-slate-500">
         <div>
           Mostrando <span className="font-semibold text-slate-800">{filteredEcfs.length}</span> de{" "}
-          <span className="font-semibold text-slate-800">{issuedEcfs.length}</span> comprobantes fiscales electrónicos
+          <span className="font-semibold text-slate-800">{issuedEcfs.length}</span> registros simulados
         </div>
         <div className="text-[11px] text-slate-400">
-          Timbrado XML certificado según norma de la República Dominicana
+          Registros simulados, sin validez fiscal
         </div>
       </div>
     </div>

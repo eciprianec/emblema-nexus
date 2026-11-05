@@ -129,6 +129,8 @@ docker compose -f docker-compose.prod.yml logs -f app
 
 Para consultar las especificaciones técnicas completas y los protocolos operativos, acceda a los documentos dedicados en la carpeta [`/docs`](file:///C:/emblema-nexus/docs):
 
+- 🧾 **[Módulo de Facturación](docs/FACTURACION.md)**: Puesta en marcha, modos de emisión, arquitectura y pasos para activar el e-CF directo.
+- 🔎 **[Revisión del Proyecto](docs/REVISION_PROYECTO.md)**: Estado real de cada área y pendientes de seguridad e integridad.
 - 📘 **[Manual de Despliegue en VPS Dedicado](file:///C:/emblema-nexus/docs/MANUAL_DESPLIEGUE_VPS.md)**: Guía paso a paso para Ubuntu 22.04 / 24.04 LTS, hardening de SSH y UFW, configuración de Docker, DNS, SSL con Caddy, ejecución de las 19 migraciones, certificados e-CF X.509 de DGII y copias de seguridad automáticas con cron.
 - 📗 **[Manual Oficial de Usuario y Operaciones](file:///C:/emblema-nexus/docs/MANUAL_USUARIO.md)**: Manual exhaustivo de los 11 módulos del sistema: gestión de clientes (Cédula/RNC), expedientes y workflows, gestión documental, agenda y Kanban, finanzas B01/B02, facturación electrónica e-CF Ley 32-23, agrimensura UTM 19N y Tareas, inmobiliaria 2+1 y comisiones con retención ISR del 10%, portal de clientes y reportes oficiales 606/607/608.
 - 📙 **[Arquitectura de Sistema](file:///C:/emblema-nexus/docs/ARCHITECTURE.md)**: Principios de diseño Server-First, aislamiento de inquilinos y flujos de datos.

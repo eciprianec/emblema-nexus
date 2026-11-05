@@ -171,7 +171,7 @@ export class FinancialBiService {
     let invQuery = (supabase.from("invoices" as any) as any)
       .select("id, total, itbis, balance_due, ncf, status, issue_date")
       .eq("company_id", companyId)
-      .not("status", "in", '("borrador","anulada")')
+      .not("status", "in", '("borrador","anulada","en_proceso")')
       .gte("issue_date", start)
       .lte("issue_date", end);
 

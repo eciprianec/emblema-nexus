@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Dialog,
   DialogContent,
@@ -11,28 +12,21 @@ import { useFinanceStore } from "../store/useFinanceStore";
 import { INVOICE_STATUS_LABELS, NCF_LABELS, PAYMENT_METHOD_LABELS } from "../types";
 import { formatMoney, formatDate } from "@/lib/utils";
 import {
-  Printer,
-  CreditCard,
   Building2,
   Calendar,
   FileCheck2,
   CheckCircle2,
   AlertTriangle,
   X,
-  ShieldCheck,
 } from "lucide-react";
-import { useEcfStore } from "@/features/ecf/store/useEcfStore";
 
 export function InvoiceDetailModal() {
   const {
     selectedInvoice,
     isInvoiceDetailOpen,
     closeInvoiceDetail,
-    openPaymentCreateModal,
     payments,
   } = useFinanceStore();
-
-  const { openEmitModal } = useEcfStore();
 
   if (!selectedInvoice) return null;
 
@@ -43,36 +37,6 @@ export function InvoiceDetailModal() {
   const statusMeta = INVOICE_STATUS_LABELS[selectedInvoice.status];
   const ncfInfo = NCF_LABELS[selectedInvoice.ncfType];
 
-  const handlePrint = () => {
-    window.print();
-  };
-
-  const handleEmitAsEcf = () => {
-    const ecfTypeMap: Record<string, "E31" | "E32" | "E34" | "E44" | "E45"> = {
-      B01: "E31",
-      B02: "E32",
-      B14: "E44",
-      B15: "E45",
-    };
-    const targetType = ecfTypeMap[selectedInvoice.ncfType] || "E31";
-    closeInvoiceDetail();
-    openEmitModal({
-      ecfType: targetType,
-      rncComprador: selectedInvoice.clientRncCedula || "",
-      razonSocialComprador: selectedInvoice.clientName,
-      currency: selectedInvoice.currency,
-      exchangeRate: selectedInvoice.exchangeRate,
-      invoiceId: selectedInvoice.id,
-      invoiceNumber: selectedInvoice.number,
-      items: selectedInvoice.items.map((it) => ({
-        description: it.description,
-        quantity: it.quantity,
-        unitPrice: it.unitPrice,
-        appliesTax: it.appliesTax,
-      })),
-    });
-  };
-
   return (
     <Dialog open={isInvoiceDetailOpen} onOpenChange={closeInvoiceDetail}>
       <DialogContent className="max-w-4xl max-h-[92vh] overflow-y-auto p-0 border border-slate-300">
@@ -80,7 +44,7 @@ export function InvoiceDetailModal() {
         <div className="bg-slate-900 text-white px-6 py-3 flex items-center justify-between print:hidden">
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold">
-              Factura Comercial {selectedInvoice.number}
+              Registro local {selectedInvoice.number}
             </span>
             <span
               className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${statusMeta.badgeClass}`}
@@ -91,37 +55,6 @@ export function InvoiceDetailModal() {
 
           <div className="flex items-center gap-2">
             <Button
-              variant="outline"
-              size="sm"
-              onClick={handleEmitAsEcf}
-              className="text-white border-slate-700 hover:bg-slate-800 text-xs h-7"
-            >
-              <ShieldCheck className="h-3.5 w-3.5 mr-1.5 text-emerald-400" />
-              Emitir como e-CF
-            </Button>
-            {selectedInvoice.balance > 0 && selectedInvoice.status !== "anulada" && (
-              <Button
-                size="sm"
-                onClick={() => {
-                  closeInvoiceDetail();
-                  openPaymentCreateModal(selectedInvoice);
-                }}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-7"
-              >
-                <CreditCard className="h-3.5 w-3.5 mr-1.5" />
-                Registrar Cobro
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handlePrint}
-              className="text-white border-slate-700 hover:bg-slate-800 text-xs h-7"
-            >
-              <Printer className="h-3.5 w-3.5 mr-1.5" />
-              Imprimir / PDF
-            </Button>
-            <Button
               variant="ghost"
               size="icon"
               onClick={closeInvoiceDetail}
@@ -130,6 +63,15 @@ export function InvoiceDetailModal() {
               <X className="h-4 w-4" />
             </Button>
           </div>
+        </div>
+
+        <div role="alert" className="border-b border-amber-300 bg-amber-50 px-6 py-3 text-xs text-amber-900">
+          <strong>Sin validez fiscal.</strong> Este registro solo existe en este navegador y su NCF no fue autorizado por
+          la DGII: no lo entregues como comprobante. Las facturas se crean en{" "}
+          <Link href="/finanzas/facturas" onClick={closeInvoiceDetail} className="font-medium underline">
+            Facturación
+          </Link>
+          .
         </div>
 
         {/* Documento Imprimible (Formato Fiscal Dominicano) */}
@@ -156,14 +98,14 @@ export function InvoiceDetailModal() {
             {/* Recuadro Fiscal NCF */}
             <div className="border-2 border-slate-900 rounded-md p-4 min-w-[280px] bg-slate-50/50 text-right">
               <div className="text-xs uppercase font-bold text-slate-500">
-                Factura Comercial
+                Registro sin validez fiscal
               </div>
               <div className="text-xl font-bold font-mono text-slate-900">
                 {selectedInvoice.number}
               </div>
               <div className="mt-2 border-t border-slate-300 pt-2">
                 <div className="text-[10px] uppercase font-bold text-slate-600">
-                  Número de Comprobante Fiscal (NCF)
+                  NCF simulado
                 </div>
                 <div className="text-base font-extrabold font-mono text-slate-900 tracking-wide">
                   {selectedInvoice.ncf}

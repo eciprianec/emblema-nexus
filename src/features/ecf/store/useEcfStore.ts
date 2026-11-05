@@ -9,19 +9,7 @@ import {
   ReceivedECF,
   ECFSequence,
   ECFConfig,
-  ECFItem,
 } from '../types';
-
-interface EmitEcfInput {
-  ecfType: ECFType;
-  rncComprador: string;
-  razonSocialComprador: string;
-  items: Omit<ECFItem, 'id' | 'total'>[];
-  currency?: 'DOP' | 'USD';
-  exchangeRate?: number;
-  invoiceId?: string;
-  invoiceNumber?: string;
-}
 
 interface EcfState {
   // Datos principales
@@ -31,8 +19,6 @@ interface EcfState {
   config: ECFConfig;
 
   // Estado de modales y vistas
-  isEmitModalOpen: boolean;
-  emitPrefillData: Partial<EmitEcfInput> | null;
   selectedEcfForPrint: IssuedECF | null;
   isPrintModalOpen: boolean;
   selectedTrackId: string | null;
@@ -42,8 +28,6 @@ interface EcfState {
   isReceivedDetailOpen: boolean;
 
   // Acciones
-  openEmitModal: (prefill?: Partial<EmitEcfInput>) => void;
-  closeEmitModal: () => void;
   openPrintModal: (ecf: IssuedECF) => void;
   closePrintModal: () => void;
   openTrackIdModal: (trackId: string, ecf?: IssuedECF) => void;
@@ -52,7 +36,6 @@ interface EcfState {
   closeReceivedDetail: () => void;
 
   // Operaciones e-CF
-  emitEcf: (input: EmitEcfInput) => IssuedECF;
   checkTrackIdStatus: (trackId: string) => {
     trackId: string;
     statusCode: string;
@@ -89,21 +72,6 @@ const INITIAL_CONFIG: ECFConfig = {
 const INITIAL_ISSUED_ECFS: IssuedECF[] = [];
 const INITIAL_RECEIVED_ECFS: ReceivedECF[] = [];
 
-function generateSecurityCode(): string {
-  const chars = '0123456789ABCDEF';
-  let result = '';
-  for (let i = 0; i < 6; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-}
-
-function generateTrackId(): string {
-  const hex = (len: number) =>
-    Array.from({ length: len }, () => Math.floor(Math.random() * 16).toString(16)).join('');
-  return `${hex(8)}-${hex(4)}-4${hex(3)}-8${hex(3)}-${hex(12)}`;
-}
-
 export const useEcfStore = create<EcfState>()(
   persist(
     (set, get) => ({
@@ -112,8 +80,6 @@ export const useEcfStore = create<EcfState>()(
   sequences: INITIAL_SEQUENCES,
   config: INITIAL_CONFIG,
 
-  isEmitModalOpen: false,
-  emitPrefillData: null,
   selectedEcfForPrint: null,
   isPrintModalOpen: false,
   selectedTrackId: null,
@@ -121,20 +87,6 @@ export const useEcfStore = create<EcfState>()(
   isTrackIdModalOpen: false,
   selectedReceivedEcf: null,
   isReceivedDetailOpen: false,
-
-  openEmitModal: (prefill) => {
-    set({
-      isEmitModalOpen: true,
-      emitPrefillData: prefill || null,
-    });
-  },
-
-  closeEmitModal: () => {
-    set({
-      isEmitModalOpen: false,
-      emitPrefillData: null,
-    });
-  },
 
   openPrintModal: (ecf) => {
     set({
@@ -178,95 +130,6 @@ export const useEcfStore = create<EcfState>()(
       selectedReceivedEcf: null,
       isReceivedDetailOpen: false,
     });
-  },
-
-  emitEcf: (input) => {
-    const { sequences, config, issuedEcfs } = get();
-    const seq = sequences[input.ecfType];
-
-    if (!seq) {
-      throw new Error(`Secuencia no configurada para el tipo ${input.ecfType}`);
-    }
-
-    if (seq.currentNumber > seq.endNumber) {
-      throw new Error(`La secuencia para ${input.ecfType} ha alcanzado el límite autorizado (${seq.endNumber}). Solicite un nuevo rango a la DGII.`);
-    }
-
-    // Formatear e-NCF: Letra + Tipo (2 dígitos) + 8 dígitos del secuencial (total 11 caracteres)
-    // Ej: E31 + 00000015 = E3100000015
-    const sequenceNumberStr = String(seq.currentNumber).padStart(8, '0');
-    const eNCF = `${seq.prefix}${sequenceNumberStr}`;
-
-    // Calcular montos
-    let subtotal = 0;
-    let itbis = 0;
-
-    const fullItems: ECFItem[] = input.items.map((item, idx) => {
-      const lineTotal = item.quantity * item.unitPrice;
-      subtotal += lineTotal;
-      if (item.appliesTax) {
-        itbis += lineTotal * 0.18;
-      }
-      return {
-        id: `ecf-itm-${Date.now()}-${idx}`,
-        description: item.description,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        appliesTax: item.appliesTax,
-        total: lineTotal,
-      };
-    });
-
-    const total = subtotal + itbis;
-    const trackId = generateTrackId();
-    const codigoSeguridad = generateSecurityCode();
-    const today = new Date().toISOString().split('T')[0];
-
-    const qrUrl = `https://ecf.dgii.gov.do/consultatimbre?RncEmisor=${config.rnc}&RncComprador=${input.rncComprador}&eNCF=${eNCF}&FechaEmision=${today}&MontoTotal=${total.toFixed(2)}&CodigoSeguridad=${codigoSeguridad}`;
-
-    const newEcf: IssuedECF = {
-      id: `ecf-${Date.now()}`,
-      eNCF,
-      ecfType: input.ecfType,
-      rncEmisor: config.rnc,
-      razonSocialEmisor: config.razonSocial,
-      rncComprador: input.rncComprador,
-      razonSocialComprador: input.razonSocialComprador,
-      fechaEmision: today,
-      fechaVencimientoSecuencia: seq.expirationDate,
-      montoSubtotal: subtotal,
-      montoItbis: itbis,
-      montoTotal: total,
-      currency: input.currency || 'DOP',
-      exchangeRate: input.exchangeRate,
-      trackId,
-      codigoSeguridad,
-      qrUrl,
-      dgiiStatus: 'aceptado',
-      dgiiStatusCode: '100',
-      dgiiStatusMessage: 'e-CF timbrado y aceptado con éxito en los Web Services de la DGII. Documento fiscal válido.',
-      digitalSignatureDigest: `SHA256withRSA/${generateTrackId().replace(/-/g, '').slice(0, 32)}`,
-      items: fullItems,
-      invoiceId: input.invoiceId,
-      invoiceNumber: input.invoiceNumber,
-      createdAt: new Date().toISOString(),
-    };
-
-    // Incrementar secuencia
-    const updatedSequences = {
-      ...sequences,
-      [input.ecfType]: {
-        ...seq,
-        currentNumber: seq.currentNumber + 1,
-      },
-    };
-
-    set({
-      issuedEcfs: [newEcf, ...issuedEcfs],
-      sequences: updatedSequences,
-    });
-
-    return newEcf;
   },
 
   checkTrackIdStatus: (trackId: string) => {

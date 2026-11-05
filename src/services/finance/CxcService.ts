@@ -303,7 +303,7 @@ export class CxcService {
       .select("*")
       .eq("company_id", companyId)
       .eq("client_id", clientId)
-      .neq("status", "anulada")
+      .not("status", "in", '("anulada","en_proceso")')
       .order("issue_date", { ascending: true });
 
     if (invErr) {

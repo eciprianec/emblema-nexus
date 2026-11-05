@@ -22,6 +22,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Faltan parámetros requeridos (file, companyId)' }, { status: 400 });
     }
 
+    // El archivo se sube antes de registrarlo: sin esta comprobación se podría escribir para otra empresa.
+    const { data: allowed } = await (supabase as any).rpc('has_permission', {
+      p_company_id: companyId,
+      p_permission_key: 'documents.upload',
+    });
+    if (allowed !== true) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+    }
+
     let clientName = 'SinCliente';
     let caseName = 'SinExpediente';
     let areaName = 'General';
@@ -43,7 +52,7 @@ export async function POST(req: NextRequest) {
     const documentService = getDocumentService();
     const document = await documentService.uploadDocument({
       fileBuffer: buffer,
-      filename: file.name,
+      filename: file.name.split(/[\\/]/).pop() || 'archivo',
       mimeType: file.type || 'application/octet-stream',
       sizeBytes: file.size,
       companyId: companyId,

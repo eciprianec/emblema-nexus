@@ -204,7 +204,7 @@ Para clientes o transacciones que operan bajo el régimen de Comprobantes Fiscal
 ### 6.1 Módulo de Cotizaciones y Conversión a Factura
 1. Ingrese a `/finanzas` y presione **Nueva Cotización**.
 2. Seleccione el cliente, moneda (DOP o USD), validez (ej. 15 días) y desglose de servicios (Honorarios por Deslinde, Tasas Registrales, Sellos de Ley).
-3. Una vez aprobada por el cliente, presione **Convertir en Factura**: el sistema traspasa los ítems y genera automáticamente la cuenta por cobrar y el comprobante fiscal correspondiente.
+3. Una vez aprobada por el cliente, presione **Convertir a Factura**: se abre una factura nueva con el cliente y los ítems precargados. Revísela y guárdela como borrador; el comprobante fiscal y la cuenta por cobrar se generan al emitirla en Facturación.
 
 ### 6.2 Tipos de Comprobantes Tradicionales (NCF Serie B)
 - **NCF B01 (Factura de Crédito Fiscal)**: Utilizado para empresas y personas físicas registradas en la DGII que requieren deducir gastos para fines del Impuesto sobre la Renta (ISR) y adelantar ITBIS. Estructura: 1 letra + 10 dígitos (ej. `B0100000045`).

@@ -125,7 +125,7 @@ export default function PortalPage() {
             Comprobantes e-CF Oficiales
           </div>
           <p className="text-[11px] text-slate-500">
-            Facturas electrónicas válidas ante la DGII bajo la Ley 32-23.
+            Demostración: sin validez fiscal.
           </p>
         </div>
       </div>

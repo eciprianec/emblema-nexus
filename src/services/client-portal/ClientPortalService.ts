@@ -565,7 +565,7 @@ export class ClientPortalService {
       .select("*")
       .eq("company_id", companyId)
       .eq("client_id", clientId)
-      .neq("status", "borrador")
+      .not("status", "in", '("borrador","en_proceso")')
       .order("issue_date", { ascending: false });
 
     if (invError) {
@@ -581,6 +581,8 @@ export class ClientPortalService {
       const { data: ecfData } = await (supabase
         .from("ecf_invoices" as any) as any)
         .select("invoice_id, encf, ecf_type, security_code, qr_code_url, dgii_status")
+        // Una factura puede tener intentos rechazados como historial.
+        .neq("dgii_status", "rechazado")
         .in("invoice_id", invoiceIds);
 
       if (ecfData) {

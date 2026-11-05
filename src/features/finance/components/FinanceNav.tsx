@@ -23,7 +23,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useFinanceStore } from "../store/useFinanceStore";
-import { useEcfStore } from "@/features/ecf/store/useEcfStore";
 
 const navItems = [
   { href: "/finanzas", label: "Resumen", icon: LayoutDashboard, exact: true },
@@ -40,15 +39,12 @@ const navItems = [
 export function FinanceNav() {
   const pathname = usePathname();
   const {
-    openInvoiceCreateModal,
     openQuoteCreateModal,
-    openPaymentCreateModal,
     openExpenseCreateModal,
   } = useFinanceStore();
-  const { openEmitModal } = useEcfStore();
 
   return (
-    <div className="border-b border-slate-200 bg-white sticky top-0 z-10 pb-1 pt-1 -mt-2 mb-6">
+    <div className="border-b border-slate-200 bg-white sticky top-0 z-10 pb-1 pt-1 -mt-2 mb-6 print:hidden">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-2">
         {/* Subnavigation Tabs */}
         <div className="flex items-center space-x-1 overflow-x-auto no-scrollbar scroll-smooth">
@@ -85,19 +81,11 @@ export function FinanceNav() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52">
-              <DropdownMenuItem
-                onClick={() => openInvoiceCreateModal()}
-                className="text-xs cursor-pointer py-2"
-              >
-                <FileText className="h-4 w-4 mr-2 text-slate-500" />
-                Nueva Factura (NCF)
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => openEmitModal()}
-                className="text-xs cursor-pointer py-2 font-medium text-slate-900"
-              >
-                <ShieldCheck className="h-4 w-4 mr-2 text-emerald-600" />
-                Emitir e-CF (Factura Electrónica)
+              <DropdownMenuItem asChild className="text-xs cursor-pointer py-2">
+                <Link href="/finanzas/facturas/nueva">
+                  <FileText className="h-4 w-4 mr-2 text-slate-500" />
+                  Nueva Factura
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => openQuoteCreateModal()}
@@ -106,12 +94,11 @@ export function FinanceNav() {
                 <FileCheck className="h-4 w-4 mr-2 text-slate-500" />
                 Nueva Cotización / Presupuesto
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => openPaymentCreateModal()}
-                className="text-xs cursor-pointer py-2"
-              >
-                <ArrowDownLeft className="h-4 w-4 mr-2 text-emerald-600" />
-                Registrar Cobro de Cliente
+              <DropdownMenuItem asChild className="text-xs cursor-pointer py-2">
+                <Link href="/finanzas/cxc">
+                  <ArrowDownLeft className="h-4 w-4 mr-2 text-emerald-600" />
+                  Registrar Cobro de Cliente
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => openExpenseCreateModal()}

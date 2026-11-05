@@ -92,6 +92,48 @@ ALTER TABLE document_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE document_template_versions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE document_links ENABLE ROW LEVEL SECURITY;
 
+-- Las políticas siguientes dependen de estas funciones, que 00010 vuelve a declarar.
+CREATE OR REPLACE FUNCTION get_user_company_ids()
+RETURNS SETOF UUID AS $$
+BEGIN
+    RETURN QUERY
+    SELECT company_id 
+    FROM company_members 
+    WHERE user_id = (SELECT auth.uid()) AND is_active = TRUE;
+END;
+$$ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = '';
+
+CREATE OR REPLACE FUNCTION has_permission(p_company_id UUID, p_permission_key TEXT)
+RETURNS BOOLEAN AS $$
+DECLARE
+    v_user_id UUID;
+    v_has_perm BOOLEAN;
+BEGIN
+    v_user_id := (SELECT auth.uid());
+    
+    -- Chequear en user_permissions
+    SELECT granted INTO v_has_perm
+    FROM user_permissions up
+    JOIN permissions p ON p.id = up.permission_id
+    WHERE up.user_id = v_user_id AND up.company_id = p_company_id AND p.key = p_permission_key;
+    
+    IF v_has_perm IS NOT NULL THEN
+        RETURN v_has_perm;
+    END IF;
+    
+    -- Chequear en role_permissions
+    SELECT EXISTS (
+        SELECT 1
+        FROM user_roles ur
+        JOIN role_permissions rp ON rp.role_id = ur.role_id
+        JOIN permissions p ON p.id = rp.permission_id
+        WHERE ur.user_id = v_user_id AND ur.company_id = p_company_id AND p.key = p_permission_key
+    ) INTO v_has_perm;
+    
+    RETURN v_has_perm;
+END;
+$$ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = '';
+
 -- Políticas RLS para documents
 CREATE POLICY "tenant_boundary_documents" ON documents
     AS RESTRICTIVE TO authenticated

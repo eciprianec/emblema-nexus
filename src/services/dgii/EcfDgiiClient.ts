@@ -89,9 +89,12 @@ export class EcfDgiiClient {
   public static async authenticate(config: EcfConfigRow): Promise<string> {
     const env = config.environment;
 
-    // Simulación inteligente para desarrollo o sin certificado (§153)
-    if (env === "DEV" || !config.has_certificate || !config.certificate_data) {
+    // La simulación es solo para DEV: fuera de ahí, un certificado faltante es un error, no un "aceptado".
+    if (env === "DEV") {
       return `MOCK_JWT_TOKEN_${config.rnc}_${Date.now()}`;
+    }
+    if (!config.has_certificate || !config.certificate_data) {
+      throw new Error("No hay certificado digital configurado para autenticarse con la DGII.");
     }
 
     const cacheKey = `${config.rnc}_${env}`;
@@ -173,8 +176,7 @@ export class EcfDgiiClient {
   ): Promise<EcfSendResult> {
     const env = config.environment;
 
-    // Modo simulación inteligente para DEV o sin credenciales (§153)
-    if (env === "DEV" || !config.has_certificate || !config.certificate_data) {
+    if (env === "DEV") {
       const mockTrackId = `MOCK-TRK-${Date.now().toString(36).toUpperCase()}-${Math.random()
         .toString(36)
         .substring(2, 7)
@@ -254,8 +256,7 @@ export class EcfDgiiClient {
   public static async queryStatus(trackId: string, config: EcfConfigRow): Promise<EcfStatusResult> {
     const env = config.environment;
 
-    // Caso de simulación DEV (§153)
-    if (trackId.startsWith("MOCK-") || env === "DEV" || !config.has_certificate) {
+    if (env === "DEV") {
       return {
         trackId,
         code: "0",
@@ -336,7 +337,7 @@ export class EcfDgiiClient {
     const cleanRnc = rnc.replace(/[^0-9]/g, "");
     const env = config.environment;
 
-    if (env === "DEV" || !config.has_certificate) {
+    if (env === "DEV") {
       // Retornar contribuyente ficticio en modo desarrollo
       return [
         {
